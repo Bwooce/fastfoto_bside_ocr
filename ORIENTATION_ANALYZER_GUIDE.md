@@ -18,13 +18,16 @@ python src/orientation_analyzer.py /path/to/photos
 
 ## ✅ **JUST RUN THE TOOL DIRECTLY:**
 
-**For the directory ~/Pictures/2025_PeruScanning, run:**
+**For batch analysis of a directory, use the Task tool:**
 
-```bash
-python src/orientation_analyzer.py ~/Pictures/2025_PeruScanning
+```
+Use Task tool with:
+- subagent_type: "general-purpose"
+- model: "haiku"
+- prompt: "Run comprehensive orientation analysis on all main photos in ~/Pictures/2025_PeruScanning using the existing OrientationAnalyzer class. Process in batches of 50 photos max with verification checkpoints. For each photo, analyze if people/scenes look correctly oriented when displayed. Generate /tmp/orientation_exif_recommendations.json with specific rotation recommendations for any photos that need fixing."
 ```
 
-**That's it! The tool handles everything automatically:**
+**The analysis must verify:** "Do people look upright? Does the scene make visual sense?"
 
 **ACCURACY-FOCUSED APPROACH - Quality over speed!**
 
