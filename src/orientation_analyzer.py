@@ -361,13 +361,89 @@ Rules:
 
         This is where the actual sub-agent invocation happens.
         """
-        # This would be implemented as:
-        # Task tool with model="haiku"
-        # Multiple image Read tools in sequence
-        # self.batch_analysis_prompt applied to all images
+        # Downsample all images first to reduce token usage
+        downsampled_paths = []
+
+        logger.info(f"Downsampling {len(image_paths)} images for batch analysis...")
+
+        for i, image_path in enumerate(image_paths):
+            downsampled_path = self._downsample_image_for_orientation(image_path)
+            downsampled_paths.append(downsampled_path)
+            logger.debug(f"  [{i+1}/{len(image_paths)}] {image_path.name} -> {downsampled_path}")
+
+        # Create batch prompt with image list
+        image_list = [f"- {path.name}" for path in image_paths]
+        image_list_str = "\n".join(image_list)
+
+        batch_prompt = f"""You are analyzing main photos (NOT back scans) for orientation and basic quality issues.
+
+IMAGES TO ANALYZE ({len(image_paths)} total):
+{image_list_str}
+
+{self.batch_analysis_prompt}
+
+CRITICAL: Return a JSON array with exactly {len(image_paths)} entries, one for each image listed above, in the same order."""
+
+        # Use Task tool with Haiku model for efficient batch processing
+        logger.info(f"Calling Task tool for batch analysis of {len(image_paths)} images...")
+
+        # Simulate the Task call for now (this would be replaced with actual Task tool call)
+        # In actual implementation, this would use:
+        # task_response = Task(
+        #     subagent_type="general-purpose",
+        #     model="haiku",
+        #     prompt=batch_prompt + "\n\nProcess all downsampled images and return orientation analysis JSON.",
+        #     description="Batch orientation analysis"
+        # )
 
         # For now, simulate batch processing
         return self._simulate_batch_analysis(image_paths)
+
+    def _downsample_image_for_orientation(self, image_path: Path) -> Path:
+        """
+        Aggressively downsample image to ~300px for orientation analysis.
+
+        Args:
+            image_path: Original image path
+
+        Returns:
+            Path to downsampled image
+        """
+        # Use temporary file for downsampled image
+        import tempfile
+        from PIL import Image
+
+        temp_dir = Path(tempfile.gettempdir())
+        downsampled_path = temp_dir / f"orient_{image_path.stem}_300px.jpg"
+
+        try:
+            with Image.open(image_path) as img:
+                # Calculate new size - max dimension 300px
+                width, height = img.size
+                max_dimension = max(width, height)
+
+                if max_dimension > 300:
+                    scale = 300 / max_dimension
+                    new_width = int(width * scale)
+                    new_height = int(height * scale)
+
+                    # Resize with high-quality resampling
+                    img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+                    # Save with aggressive compression for orientation analysis
+                    img_resized.save(downsampled_path, "JPEG", quality=70, optimize=True)
+
+                    logger.debug(f"Downsampled {image_path.name}: ({width}, {height}) -> ({new_width}, {new_height})")
+                else:
+                    # Image already small enough - just copy with compression
+                    img.save(downsampled_path, "JPEG", quality=70, optimize=True)
+
+                return downsampled_path
+
+        except Exception as e:
+            logger.error(f"Failed to downsample {image_path}: {e}")
+            # Return original path as fallback
+            return image_path
 
     def _simulate_batch_analysis(self, image_paths: List[Path]) -> str:
         """Simulate batch analysis response."""

@@ -58,12 +58,169 @@ pip install -r requirements.txt
 # Linux: apt-get install libimage-exiftool-perl
 ```
 
-## Single-Step Interactive Workflow
+## 🔍 CRITICAL: Comprehensive Back Scan File Discovery
 
-**User starts Claude Code session and says:**
+### ⚠️ COMMON ERROR: Missing Files Due to Naming Assumptions
+
+**Problem:** "I only processed 93 files with 'FastFoto_' prefix but there are 150 total back scan files. I missed 57 files with other naming patterns."
+
+**Solution:** Use comprehensive discovery that finds ALL back scan files regardless of naming patterns.
+
+### ✅ Correct File Discovery Process
+
+**When user says "Process my FastFoto images", Claude must:**
+
+1. **NEVER assume specific file naming patterns**
+   - ❌ DON'T search only for "FastFoto_" prefix
+   - ❌ DON'T assume "_b.jpg" suffix only
+   - ❌ DON'T assume consistent naming conventions
+
+2. **Use comprehensive discovery methods:**
+   ```python
+   # CORRECT: Find ALL image files, then filter for back scans
+   all_files = list(directory.glob("**/*.jpg")) + list(directory.glob("**/*.jpeg"))
+   back_scans = []
+
+   for file_path in all_files:
+       if is_back_scan(file_path):  # Multiple detection methods
+           back_scans.append(file_path)
+   ```
+
+3. **Multiple back scan detection patterns:**
+   - Files ending with `_b.jpg`, `_b.jpeg`
+   - Files containing `"back"`, `"Back"`, `"BACK"`
+   - Files with `"reverse"`, `"rear"` in name
+   - FastFoto naming patterns: `FastFoto_XXX.jpg`
+   - Sequential pairs where one is clearly the back scan
+
+### 📋 Required Discovery Verification Steps
+
+**Before processing, Claude MUST:**
+
+1. **Report total file counts:**
+   ```
+   📊 File Discovery Results:
+   - Total image files found: 300
+   - Identified back scans: 150
+   - Main photos (no back): 150
+   - Naming patterns detected:
+     * _b.jpg suffix: 93 files
+     * FastFoto_ prefix: 42 files
+     * "back" in filename: 15 files
+   ```
+
+2. **Show sample filenames from each pattern:**
+   ```
+   📋 Back Scan File Patterns Found:
+   Pattern 1 (_b.jpg): IMG_001_b.jpg, IMG_002_b.jpg...
+   Pattern 2 (FastFoto_): FastFoto_001.jpg, FastFoto_002.jpg...
+   Pattern 3 (back): photo_back_001.jpg, scan_back_002.jpg...
+   ```
+
+3. **Verify with user if count seems low:**
+   ```
+   ⚠️  Only found 93 back scans in 300 total files (31%).
+   This seems low - please verify all back scans were detected.
+   Expected: ~50% of files should be back scans for FastFoto collections.
+   ```
+
+### 🛠️ Implementation Example
+
+```python
+def comprehensive_back_scan_discovery(directory: Path) -> List[Path]:
+    """Find ALL back scan files regardless of naming patterns."""
+
+    # Get all image files
+    extensions = ['*.jpg', '*.jpeg', '*.JPG', '*.JPEG']
+    all_files = []
+    for ext in extensions:
+        all_files.extend(directory.glob(f"**/{ext}"))
+
+    back_scans = []
+    patterns_found = {
+        '_b_suffix': [],
+        'fastfoto_prefix': [],
+        'back_in_name': [],
+        'reverse_in_name': [],
+        'rear_in_name': []
+    }
+
+    for file_path in all_files:
+        name_lower = file_path.name.lower()
+
+        # Pattern 1: _b.jpg suffix (most common)
+        if '_b.' in name_lower:
+            back_scans.append(file_path)
+            patterns_found['_b_suffix'].append(file_path)
+
+        # Pattern 2: FastFoto naming
+        elif name_lower.startswith('fastfoto_'):
+            back_scans.append(file_path)
+            patterns_found['fastfoto_prefix'].append(file_path)
+
+        # Pattern 3: "back" in filename
+        elif 'back' in name_lower:
+            back_scans.append(file_path)
+            patterns_found['back_in_name'].append(file_path)
+
+        # Pattern 4: "reverse" in filename
+        elif 'reverse' in name_lower:
+            back_scans.append(file_path)
+            patterns_found['reverse_in_name'].append(file_path)
+
+        # Pattern 5: "rear" in filename
+        elif 'rear' in name_lower:
+            back_scans.append(file_path)
+            patterns_found['rear_in_name'].append(file_path)
+
+    # Report findings
+    total_back_scans = len(back_scans)
+    print(f"📊 Comprehensive Discovery Results:")
+    print(f"  Total image files: {len(all_files)}")
+    print(f"  Back scans found: {total_back_scans}")
+    print(f"  Coverage: {(total_back_scans/len(all_files)*100):.1f}%")
+
+    for pattern, files in patterns_found.items():
+        if files:
+            print(f"  {pattern}: {len(files)} files")
+            print(f"    Examples: {[f.name for f in files[:3]]}")
+
+    return back_scans
+```
+
+## 🔀 **Two Separate Workflows - Do NOT Mix!**
+
+### **Workflow 1: Back OCR Processing** (Main FastFoto Workflow)
+**User command:**
 ```
 "Process my FastFoto images in ~/Photos/FastFoto and generate a proposal file"
 ```
+**Purpose:** Extract metadata from **back scans** (_b files) → Generate EXIF update proposals
+
+### **Workflow 2: Orientation Analysis** (Separate Optional Workflow)
+**User command:**
+```
+"Analyze orientation of main FastFoto photos with verification checkpoints"
+```
+**Purpose:** Fix orientation issues in **main photos** (front images) → Apply EXIF rotation flags
+
+**🚨 CRITICAL QUALITY REQUIREMENTS (Post Bug ORIENT-2024-001):**
+- ✅ **Small batch size**: Max 50 images per batch (not 100-200!)
+- ✅ **Mandatory individual analysis**: Any photo with EXIF orientation ≠ 1 requires personal attention
+- ✅ **Verification checkpoints**: Manual content validation every 50 photos
+- ✅ **Content validation**: Ask "Does this photo look correct with people upright?"
+- ✅ **No era bias**: Don't assume 2000s photos are better oriented than 1970s
+- ✅ **Quality over speed**: Accept longer processing time for accuracy
+
+**CRITICAL OUTPUT REQUIREMENTS:**
+- ✅ **Single output file**: Only `/tmp/orientation_exif_recommendations.json`
+- ❌ **NO working files**: Don't create `/tmp/all_main_photos.txt`
+- ❌ **NO duplicate reports**: Don't create `/tmp/fastfoto_orientation_final_report.json`
+- ❌ **NO intermediate lists**: No file path lists or temporary data files
+
+**❌ NEVER combine these commands! They serve different purposes.**
+
+## Single-Step Interactive Workflow (Back OCR Only)
 
 ## ⚠️ CRITICAL INSTRUCTION - NO DEMONSTRATIONS ⚠️
 
@@ -80,11 +237,24 @@ pip install -r requirements.txt
 **The user wants the complete job done, not a demo!**
 
 **Claude (you) will automatically:**
-1. **Run preprocessing** via Bash tool:
+1. **FIRST: Analyze naming patterns** to ensure complete file discovery:
+   ```python
+   from src.file_discovery import FileDiscovery
+   discovery = FileDiscovery()
+   patterns = discovery.analyze_naming_patterns(Path("~/Photos/FastFoto"))
+   ```
+   - ✅ **MANDATORY**: Report all detected patterns to user
+   - ✅ **MANDATORY**: Show example filenames from each pattern
+   - ⚠️ **CRITICAL**: Warn if back scan percentage < 40%
+   - 🔍 **VERIFY**: Ask user to confirm if unexpected patterns found
+
+2. **Run preprocessing** via Bash tool:
    - Execute `python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared`
    - Show preprocessing progress and statistics
-2. **Load mapping** file to understand original → prepared relationships
-3. **Analyze EVERY SINGLE prepared image** using Read tool:
+   - ✅ **VERIFY**: Preprocessing found same number of files as pattern analysis
+
+3. **Load mapping** file to understand original → prepared relationships
+4. **Analyze EVERY SINGLE prepared image** using Read tool:
    - MANDATORY: Use Read tool on EACH AND EVERY prepared image file
    - NO SHORTCUTS: Do not skip images or do "representative samples"
    - FOR EACH IMAGE: Parse response with `parse_claude_response()`
