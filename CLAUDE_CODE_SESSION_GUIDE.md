@@ -1,10 +1,26 @@
 # Claude Code Session Guide: FastFoto OCR
 
-## 🚨 CRITICAL RULE FOR CLAUDE 🚨
+## 🚨 CRITICAL RULES FOR CLAUDE 🚨
 
-**When a user asks to "process FastFoto images", you MUST process ALL images, not demonstrate with samples.**
+**When a user asks to "process FastFoto images":**
 
-**NEVER DO DEMONSTRATIONS. ALWAYS COMPLETE THE FULL JOB.**
+### RULE 1: COMPLETE THE FULL JOB
+- ✅ **DO** process ALL images, not demonstrate with samples
+- ❌ **NEVER** do demonstrations or partial processing
+
+### RULE 2: NO PAUSING FOR OPTIMIZATION
+- ✅ **DO** start processing immediately and work through the entire collection
+- ❌ **NEVER** pause to suggest "more efficient approaches"
+- ❌ **NEVER** offer batch processing scripts (they don't work - only Read tool works)
+- ❌ **NEVER** suggest breaking into sessions or prioritized processing
+- ❌ **NEVER** ask user to choose between "Option A/B/C" alternatives
+- ❌ **NEVER** worry about session limits or time estimates
+
+### RULE 3: JUST DO THE WORK
+- The user wants the job DONE, not suggestions for optimization
+- Process images one by one using Read tool until complete or session ends naturally
+- If session ends, user will start a new session to continue - don't pre-optimize for this
+- ✅ **ENHANCEMENT IDEAS ARE WELCOME AFTER PROCESSING IS COMPLETE** (not during)
 
 ## Architecture Decision: Interactive Claude Code Mode
 
@@ -80,10 +96,23 @@ pip install -r requirements.txt
 
 **⚠️ ABSOLUTE REQUIREMENT: Process EVERY SINGLE IMAGE - NO DEMONSTRATIONS ⚠️**
 
+## 🛑 CRITICAL: NO PAUSING FOR "EFFICIENCY" SUGGESTIONS 🛑
+
+**When you start processing, DO NOT pause to suggest:**
+- ❌ "This will take 6-8 hours, let me suggest alternatives..."
+- ❌ "Let me create a batch processing script..." (scripts don't work!)
+- ❌ "Would you prefer Option A: continue, Option B: break into sessions..."
+- ❌ "Focus on high-value images first..."
+- ❌ "Process 20-30 images per session..."
+
+**JUST START PROCESSING AND KEEP GOING UNTIL DONE.**
+
+The user knows it takes time. They want the complete job done, not optimization advice.
+
 **Processing Time Expectations:**
-- Small collections (10-50 images): 3-15 minutes
-- Medium collections (50-200 images): 15-60 minutes
-- Large collections (200+ images): 1+ hours
+- Small collections (10-50 images): 15-30 minutes
+- Medium collections (50-200 images): 1-3 hours
+- Large collections (200+ images): 2+ hours
 - Each image takes ~10-18 seconds to analyze with Read tool
 
 **User reviews proposal, then says:**
@@ -325,6 +354,22 @@ Done! Your original photos now have updated EXIF metadata from the back scans.
 1. Do you have sample photos ready for testing? Where?
 2. Should I create the new `interactive_processor.py` file?
 3. Should I update the README to explain the interactive workflow?
+
+---
+
+## 📋 CLAUDE WORKFLOW SUMMARY
+
+**When user says "Process my FastFoto images":**
+
+1. ✅ **START IMMEDIATELY** - Run preprocessing, then start Read tool analysis of ALL images
+2. ✅ **PROCESS EVERYTHING** - Use Read tool on every single prepared image (no samples)
+3. ✅ **SHOW PROGRESS** - "Processing [X/TOTAL] imagename.jpg..." as you go
+4. ✅ **GENERATE COMPLETE PROPOSAL** - Include all actual results from all images
+5. ❌ **NO PAUSING** - Don't suggest alternatives, optimizations, or session breaks
+6. ❌ **NO OPTIONS** - Don't ask "Would you prefer A, B, or C?"
+7. ✅ **ENHANCEMENT IDEAS** - Feel free to suggest improvements AFTER processing is complete
+
+**The user wants the complete job done first, suggestions second.**
 
 ---
 
