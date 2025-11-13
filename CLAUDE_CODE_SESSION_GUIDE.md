@@ -63,14 +63,17 @@ pip install -r requirements.txt
 **Claude (you) will:**
 6. Parse the proposal file
 7. Skip entries marked with `SKIP:`
-8. Apply EXIF updates to **original photos** via `exif_writer`
-9. Report results
+8. Apply EXIF updates to **original photos** via `exif_writer` (no backup files)
+9. Move processed back scan files to `processed/` subdirectories
+10. Report results with organization statistics
 
 **Benefits:**
 - **Simple UX**: One command does everything
 - **No temp management**: Claude handles preprocessing automatically
 - **Error recovery**: Can fix issues in same session
 - **Seamless workflow**: No context switching
+- **Clean organization**: Processed back scans moved to `processed/` subdirectories
+- **No backup clutter**: Clean EXIF updates without `*_original` files
 
 ## Tasks for Phase 2
 

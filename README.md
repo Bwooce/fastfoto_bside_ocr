@@ -229,8 +229,8 @@ After reviewing and editing the proposal, continue in the same Claude Code sessi
 **Claude Code will:**
 1. Parse the proposal file
 2. Skip entries marked with `SKIP:`
-3. Apply EXIF updates to **original photos** (not prepared images)
-4. Create backup files (*_original)
+3. Apply EXIF updates to **original photos** (clean updates, no backup files)
+4. Move processed back scan files to `processed/` subdirectories
 5. Report results
 
 **Example output:**
@@ -239,14 +239,59 @@ You: "Apply the proposal file"
 
 Claude: Applying EXIF updates from proposal file to original photos...
 
-Processing updates: 100%|████████████████| 289/289 [00:12<00:00, 23.47it/s]
+================================================================================
+APPLY PROPOSAL RESULTS
+================================================================================
+✅ Photos updated:        289
+📁 Back scans organized:  287
+⏭️  Entries skipped:       2
+❌ Errors:               0
+================================================================================
 
-✓ Updated 289 photos
-✓ Skipped 2 (marked with SKIP:)
-✓ Backups created (*_original files)
+✨ Processed back scans moved to 'processed/' subdirectories
+💡 Tip: To reprocess, move files back from processed/ directories
 
-Done! Your original photos now have updated EXIF metadata from the back scans.
+Done! Your photos now have updated EXIF metadata and processed back scans are organized.
 ```
+
+## File Organization
+
+### Before Processing
+```
+~/Photos/FastFoto/
+├── IMG_001.jpg          # Original photo
+├── IMG_001_b.jpg        # Back scan
+├── IMG_002.jpg          # Original photo
+├── IMG_002_b.jpg        # Back scan
+└── Vacation_2023/
+    ├── IMG_003.jpg
+    ├── IMG_003_b.jpg
+    ├── IMG_004.jpg
+    └── IMG_004_b.jpg
+```
+
+### After Processing
+```
+~/Photos/FastFoto/
+├── IMG_001.jpg          # ✅ Updated with EXIF metadata
+├── IMG_002.jpg          # ✅ Updated with EXIF metadata
+├── processed/
+│   ├── IMG_001_b.jpg    # 📁 Moved after successful processing
+│   └── IMG_002_b.jpg    # 📁 Moved after successful processing
+└── Vacation_2023/
+    ├── IMG_003.jpg      # ✅ Updated with EXIF metadata
+    ├── IMG_004.jpg      # ✅ Updated with EXIF metadata
+    └── processed/
+        ├── IMG_003_b.jpg
+        └── IMG_004_b.jpg
+```
+
+**Benefits:**
+- ✅ **Clean workspace**: Only original photos remain in main directories
+- ✅ **Clear tracking**: Moved files = successfully processed
+- ✅ **No backup clutter**: No `*_original` files created
+- ✅ **Reprocessing option**: Move files back from `processed/` if needed
+- ✅ **Hierarchical organization**: Each directory gets its own `processed/` subdirectory
 
 ## Configuration
 
@@ -347,6 +392,8 @@ src/
 - **No temp management**: Claude handles preprocessing automatically
 - **Error recovery**: Can fix preprocessing issues in same session
 - **Seamless workflow**: No context switching between tools
+- **Clean organization**: Processed back scans moved to `processed/` subdirectories
+- **No backup clutter**: Clean EXIF updates without `*_original` files
 - **Cost-effective**: $0 using Claude Max subscription
 
 ### Why Claude Code vs. API?
