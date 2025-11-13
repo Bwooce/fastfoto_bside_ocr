@@ -66,36 +66,17 @@ class FileDiscovery:
 
     def is_back_file(self, path: Path) -> bool:
         """
-        Check if file is a back-side scan using comprehensive pattern detection.
+        Check if file is a back-side scan.
 
-        Detects multiple naming patterns to avoid missing files:
-        - _b.jpg, _B.jpg (traditional suffixes, includes FastFoto_XXX_b.jpg)
-        - *back*.jpg, *Back*.jpg, *BACK*.jpg
-        - *reverse*.jpg, *rear*.jpg
+        Uses the standard _b/_B suffix pattern (e.g., IMG_001_b.jpg, FastFoto_0522_b.jpg)
         """
         if not self.is_photo_file(path):
             return False
 
         stem = path.stem  # filename without extension
-        name_lower = path.name.lower()
 
-        # Pattern 1: Traditional _b/_B suffix (includes FastFoto_XXX_b.jpg)
-        if any(stem.endswith(suffix) for suffix in self.back_suffixes):
-            return True
-
-        # Pattern 2: Contains "back" in filename
-        if 'back' in name_lower:
-            return True
-
-        # Pattern 3: Contains "reverse" in filename
-        if 'reverse' in name_lower:
-            return True
-
-        # Pattern 4: Contains "rear" in filename
-        if 'rear' in name_lower:
-            return True
-
-        return False
+        # Standard _b/_B suffix pattern
+        return any(stem.endswith(suffix) for suffix in self.back_suffixes)
 
     def get_original_path(self, back_path: Path) -> Path:
         """
