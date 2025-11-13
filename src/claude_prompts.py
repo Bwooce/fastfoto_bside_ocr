@@ -134,10 +134,11 @@ Analyze this photo back scan and extract structured metadata for EXIF enrichment
 - Convert ALL dates to YYYY-MM-DD format (ISO standard)
 - Preserve original text in `*_original` fields
 - For ambiguous 2-digit years: 00-30 = 20xx, 31-99 = 19xx
+- **For ambiguous dates: ASSUME DD/MM/YY format** (e.g. "1/2/85" = February 1, 1985 = "1985-02-01")
 - Spanish months: enero=01, febrero=02, marzo=03, abril=04, mayo=05, junio=06, julio=07, agosto=08, septiembre=09, octubre=10, noviembre=11, diciembre=12
 - Roman numerals: I=01, II=02, III=03, IV=04, V=05, VI=06, VII=07, VIII=08, IX=09, X=10, XI=11, XII=12
 - Spanish events: "Año Nuevo" = January 1, "Navidad" = December 25
-- Examples: "1-31-85" → "1985-01-31", "26/XI/94" → "1994-11-26", "Año Nuevo 96" → "1996-01-01"
+- Examples: "1-31-85" → "1985-01-31", "1/2/85" → "1985-02-01", "26/XI/94" → "1994-11-26", "Año Nuevo 96" → "1996-01-01"
 
 **🚨 CRITICAL - raw_ocr_complete Field 🚨**:
 - TRANSCRIBE EVERY SINGLE CHARACTER you can see

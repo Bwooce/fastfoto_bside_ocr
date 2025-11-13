@@ -2,54 +2,56 @@
 
 ## 🚀 How to Invoke in Claude Code Sessions
 
-### Method 1: Direct Analysis
+### Method 1: Direct Analysis (Preprocessed Images)
 ```
-"Analyze the orientation and quality of this image using Haiku model: /path/to/photo.jpg"
+"Analyze the orientation and quality of this prepared image using Haiku model: /tmp/fastfoto_prepared/IMG_001_b.jpg"
 ```
 
 Claude will:
 1. Use Task tool with `model="haiku"`
-2. Use Read tool on the image
+2. Use Read tool on the preprocessed image
 3. Apply orientation analysis prompt
 4. Return orientation, quality, and processing recommendations
 
-### Method 2: Batch Analysis
+### Method 2: Full Workflow (Large Images)
 ```
-"Run orientation analysis on all photos in ~/Photos/FastFoto using Haiku model for cost efficiency"
+"Preprocess FastFoto images from ~/Photos/FastFoto then run orientation analysis using Haiku for cost efficiency"
 ```
 
 Claude will:
-1. Discover all image files
-2. Analyze each with Haiku model
-3. Generate batch report with recommendations
-4. Filter images for detailed OCR processing
+1. Run preprocessing script to resize/convert large images
+2. Discover all prepared image files
+3. Analyze each with Haiku model
+4. Generate batch report with recommendations
+5. Filter images for detailed OCR processing
 
-## 📏 **Unconverted Image Handling**
+## 📏 **Image Size Handling**
 
-### ✅ **CAN Handle Unconverted Images**
+### ⚠️ **REQUIRES Preprocessing for Large Images**
 
-**Haiku Model Limits:**
-- **Max dimension**: ~5000px (much larger than Sonnet's 2000px limit)
-- **Max file size**: ~32MB
+**Claude Code Read Tool Limits (ALL models):**
+- **Max dimension**: 2000px
+- **Max file size**: ~5MB
 - **Formats**: JPEG, PNG, GIF, WebP
 
 **Your FastFoto Images:**
-- Most scanned photos: 2000-4000px dimension
-- File sizes: Usually 5-15MB for high-quality scans
-- **Result**: Most images will work directly without conversion!
+- Typical scanned photos: 3000-6000px dimension
+- File sizes: Usually 10-50MB for high-quality scans
+- **Result**: Need preprocessing before ANY Claude Code analysis!
 
 ### 🎯 **Workflow Integration**
 
-**Option A: Pre-Processing Filter (Recommended)**
+**Option A: Two-Stage Preprocessing (Recommended)**
 ```
-User: "Run orientation analysis on ~/Photos/FastFoto, then process high-value images with detailed OCR"
+User: "First preprocess FastFoto images for analysis, then run orientation analysis using Haiku"
 
 Claude:
-1. Analyzes ALL images with Haiku (~$2-5 for 500 images)
-2. Filters out unusable images (blur, poor quality)
-3. Fixes orientation issues automatically
-4. Processes good candidates with Sonnet OCR (~$50-100)
-5. Total cost savings: 50-70% vs processing everything
+1. Runs preprocessing script: python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared
+2. Analyzes prepared images with Haiku (~$2-5 for 500 images)
+3. Filters out unusable images (blur, poor quality)
+4. Fixes orientation issues automatically
+5. Processes good candidates with Sonnet OCR (~$50-100)
+6. Total cost savings: 50-70% vs processing everything
 ```
 
 **Option B: Parallel Processing**
@@ -114,12 +116,16 @@ class EnhancedInteractiveProcessor:
 ## 🎯 **Sample Claude Code Session**
 
 ```
-User: "Analyze orientation and quality of FastFoto images in ~/Photos/FastFoto using cost-effective approach"
+User: "Preprocess and analyze orientation/quality of FastFoto images in ~/Photos/FastFoto using cost-effective approach"
 
-Claude: I'll use the OrientationAnalyzer with Haiku model for cost-effective bulk analysis.
+Claude: I'll first preprocess the images, then use OrientationAnalyzer with Haiku model for cost-effective bulk analysis.
 
+Step 1: Preprocessing large images...
+[Runs: python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared]
+
+Step 2: Orientation analysis with Haiku...
 [Uses Task tool with model="haiku"]
-[Processes images in batches]
+[Processes prepared images in batches]
 
 Results:
 📊 Analysis Summary:
