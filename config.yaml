@@ -1,0 +1,353 @@
+# FastFoto OCR Configuration
+# Refined based on analysis of 151 sample images
+version: "1.0"
+
+# Claude API Configuration
+api:
+  provider: "anthropic"  # Uses claude-3-5-sonnet via Anthropic API
+  model: "claude-3-5-sonnet-20241022"
+  api_key_env: "ANTHROPIC_API_KEY"  # Read from environment variable
+  max_retries: 3
+  timeout_seconds: 60  # Increased for larger images
+  base_url: null  # Optional: custom API endpoint
+
+# Processing Configuration
+processing:
+  max_workers: 4  # Concurrent processes (adjust based on CPU count and API rate limits)
+  min_confidence_threshold: 0.65  # Minimum OCR confidence to accept (based on analysis: avg 0.86)
+  max_processing_time_per_image: 300  # 5 minutes in seconds
+  image_resize_threshold_mb: 3.5  # Resize images larger than this (API limit: 5MB after base64)
+  resized_image_max_dimension: 2000  # Max width/height in pixels
+  resized_image_quality: 85  # JPEG quality (1-100)
+
+# File Patterns
+files:
+  input_extensions: [".jpg", ".jpeg", ".tif", ".tiff", ".JPG", ".JPEG", ".TIF", ".TIFF"]
+  back_suffixes: ["_b", "_B"]
+  processed_directory: "processed"
+  proposal_file: "exif_updates_proposal.txt"
+  log_file: "fastfoto_ocr.log"
+  temp_directory: "/tmp/fastfoto_ocr"
+
+# Date Format Recognition
+# NOTE: Claude Vision can parse most date formats naturally
+# These are for documentation and validation, not strict regex matching
+# Focus is on ZONES and CHARACTERISTICS rather than exact patterns
+
+date_formats:
+  # PRIORITY ZONES for date search (in order):
+  zones:
+    - name: "Bottom Edge"
+      priority: 1
+      description: "Consumer processing stamps (50%+ of machine dates)"
+      characteristics: "Very small (1-3mm), faint gray, format: ###-### <No.##> YY.MM.DD HH:MMPM CODE"
+
+    - name: "Center Horizontal"
+      priority: 2
+      description: "APS format or photo-back stamps"
+      characteristics: "Small but visible black text, format: YY/MMM/D HH:MMAM ID###-### <##>"
+
+    - name: "Vertical/Rotated"
+      priority: 3
+      description: "Lab processing codes (rotated 90°)"
+      characteristics: "Vertical text band, technical codes"
+
+    - name: "Scattered Handwritten"
+      priority: 4
+      description: "Spanish/English handwritten dates"
+      characteristics: "Variable placement, Spanish: 'de Noviembre de', English: month names"
+
+  # Example formats (for reference, Claude can parse variations)
+  examples:
+    spanish_handwritten:
+      - "27 de Noviembre de 1983"
+      - "Marzo 1981"
+      - "Noviembre, 1998"
+
+    machine_consumer:
+      - "02/04/22 09:47PM"  # YY/MM/DD HH:MMPM
+      - "02.11.17 08:34PM"  # YY.MM.DD HH:MMPM
+      - "02.10.02 05:46PM"
+
+    machine_aps:
+      - "99/JUN/7 11:32AM"  # YY/MMM/D HH:MMAM
+      - "99/MAY/14 06:14AM"
+
+    machine_professional:
+      - "09.01.12"  # YY.MM.DD (professional lab)
+
+    numeric:
+      - "25/12/1999"
+      - "1981"
+
+# Month name translations
+month_names:
+  spanish:
+    Enero: 1
+    Febrero: 2
+    Marzo: 3
+    Abril: 4
+    Mayo: 5
+    Junio: 6
+    Julio: 7
+    Agosto: 8
+    Septiembre: 9
+    Octubre: 10
+    Noviembre: 11
+    Diciembre: 12
+  english:
+    January: 1
+    February: 2
+    March: 3
+    April: 4
+    May: 5
+    June: 6
+    July: 7
+    August: 8
+    September: 9
+    October: 10
+    November: 11
+    December: 12
+
+# Film Roll & Lab Processing Recognition
+# FOUND in 50%+ of files - CRITICAL metadata source!
+roll_and_lab_patterns:
+  enabled: true
+
+  # Consumer processing format (MOST COMMON - 50%+)
+  consumer_processing:
+    format: "###-### <No.##> YY.MM.DD HH:MMPM CODE"
+    examples:
+      - "340-555 <No.24> 02/04/22 09:47PM VIKD"
+      - "352-417 <No. 12> 02.11.17 08:34PM CHIOM"
+      - "352-417 <No. 1> 02.09.28 06:07PM CHIOM"
+    location: "Bottom horizontal edge"
+    characteristics: "Very small (1-3mm), faint gray"
+    contains:
+      - roll_id: "###-###"
+      - frame: "<No.##>"
+      - date: "YY.MM.DD or YY/MM/DD"
+      - time: "HH:MMPM"
+      - lab_code: "VIKD, CHIOM, etc."
+
+  # APS system format
+  aps_format:
+    format: "YY/MMM/D HH:MMAM ID###-### <##> CODE"
+    examples:
+      - "99/JUN/7 11:32AM ID529-981 <24> 1KM44"
+      - "99/MAY/14 06:14AM ID529-981 <10> 1KM44"
+    location: "Center horizontal area"
+    characteristics: "Small but visible black text"
+    contains:
+      - date: "YY/MMM/D"
+      - time: "HH:MMAM"
+      - roll_id: "ID###-###"
+      - frame: "<##>"
+      - equipment_code: "1KM44, etc."
+
+  # Professional lab format
+  professional_lab:
+    format: "Multi-line technical data"
+    examples:
+      - "TUL Nelson <S No. 1 4FM-012 CM"
+      - "42?-1008 003 H H H-1 956239 09.01.12 6805 2118.0% 100.0"
+    location: "Multiple lines, various positions"
+    characteristics: "Technical codes, dates embedded"
+
+  # Lab codes discovered
+  lab_codes:
+    - VIKD
+    - CHIOM
+    - TUL
+    - "1KM44"  # APS equipment
+
+# Location Mapping & Geocoding
+locations:
+  # Predefined common locations (from analysis)
+  known_locations:
+    # Peru locations
+    - names: ["Lima", "Peru", "Perú"]
+      coordinates: [-12.0464, -77.0428]
+      timezone: "America/Lima"
+      city: "Lima"
+      country: "Peru"
+      country_code: "PE"
+
+    - names: ["San Isidro", "San Isidro Lima"]
+      coordinates: [-12.0958, -77.0385]
+      timezone: "America/Lima"
+      city: "Lima"
+      sublocation: "San Isidro"
+      country: "Peru"
+      country_code: "PE"
+
+    - names: ["Miraflores", "Miraflores Lima"]
+      coordinates: [-12.1198, -77.0289]
+      timezone: "America/Lima"
+      city: "Lima"
+      sublocation: "Miraflores"
+      country: "Peru"
+      country_code: "PE"
+
+    # Add specific venues from your collection as needed
+    # Example format:
+    # - names: ["Venue Name", "Alternative Name"]
+    #   coordinates: [lat, lon]
+    #   timezone: "America/Lima"
+    #   city: "City"
+    #   sublocation: "Neighborhood"
+    #   country: "Country"
+    #   country_code: "CC"
+
+    # International locations from analysis
+    - names: ["Panama", "Panamá"]
+      coordinates: [8.9824, -79.5199]
+      timezone: "America/Panama"
+      city: "Panama City"
+      country: "Panama"
+      country_code: "PA"
+
+    - names: ["Dallas", "Dallas Texas", "Dallas TX"]
+      coordinates: [32.7767, -96.7970]
+      timezone: "America/Chicago"
+      city: "Dallas"
+      country: "United States"
+      country_code: "US"
+
+    - names: ["Lausanne", "Pausanne"]  # Includes OCR variant
+      coordinates: [46.5197, 6.6323]
+      timezone: "Europe/Zurich"
+      city: "Lausanne"
+      country: "Switzerland"
+      country_code: "CH"
+
+    - names: ["Holland", "Netherlands", "Nederland"]
+      coordinates: [52.1326, 5.2913]
+      timezone: "Europe/Amsterdam"
+      country: "Netherlands"
+      country_code: "NL"
+
+    - names: ["Utrecht", "Utrecht Netherlands"]
+      coordinates: [52.0907, 5.1214]
+      timezone: "Europe/Amsterdam"
+      city: "Utrecht"
+      country: "Netherlands"
+      country_code: "NL"
+
+    - names: ["Auckland", "New Zealand", "NZ"]
+      coordinates: [-36.8485, 174.7633]
+      timezone: "Pacific/Auckland"
+      city: "Auckland"
+      country: "New Zealand"
+      country_code: "NZ"
+
+  # Geocoding API (for unknown locations like hotel names)
+  geocoding:
+    enabled: true
+    provider: "nominatim"  # Free OpenStreetMap geocoding
+    user_agent: "FastFotoOCR/1.0"  # Required by Nominatim
+    cache_file: ".geocoding_cache.json"
+    rate_limit_seconds: 1  # Respect Nominatim usage policy (max 1 request/second)
+    country_bias: ["PE", "PA", "CH", "NL", "NZ", "US"]  # Prioritize these countries
+    timeout_seconds: 10
+
+# OCR Filtering
+ocr_filtering:
+  # Ignore these phrases (not useful metadata) - based on analysis
+  ignore_phrases:
+    - "Kodak Advanced Photo System"
+    - "APS"
+    - "Professional Photo"
+    - "Quality Lab"
+    - "Printed in USA"
+    - "© Kodak"
+    - "Photo Lab"
+    - "Fujifilm"
+    - "Agfa"
+
+  # Minimum text length to consider (filter out noise)
+  min_text_length: 3
+
+  # Maximum text length for free text field
+  # Analysis showed extensive narratives - increased from 500 to 1000
+  max_freetext_length: 1000
+
+  # Confidence thresholds
+  min_date_confidence: 0.65
+  min_location_confidence: 0.60
+  min_text_confidence: 0.65
+
+# Filename Analysis
+filename_analysis:
+  enabled: true
+  date_discrepancy_threshold_days: 365  # Flag if OCR date differs by more than 1 year
+  extract_date_patterns:
+    - pattern: '(\d{4})[-_](\d{2})[-_](\d{2})'
+      format: "YYYY-MM-DD"
+    - pattern: '(\d{4})'  # Year only (common in this collection)
+      format: "YYYY"
+    - pattern: '(\d{8})'  # YYYYMMDD
+      format: "YYYYMMDD"
+
+# Image Quality Assessment
+quality_checks:
+  # Determine if _b file is useful or just damage/marks
+  min_text_density: 0.01  # Minimum ratio of text to image area
+  min_distinct_chars: 5    # Must have at least 5 different characters
+  max_similar_chars_ratio: 0.8  # If 80%+ same character, likely noise
+
+  # Based on analysis: 60% useful rate
+  useful_threshold_confidence: 0.60
+
+# EXIF Field Preferences (based on analysis findings)
+exif_fields:
+  # Date/Time
+  date_time_original: true
+  create_date: true
+  modify_date: true
+  offset_time_original: true
+
+  # Location (HIGH PRIORITY - venue/hotel names found)
+  gps_latitude: true
+  gps_longitude: true
+  location_created_city: true
+  location_created_country_name: true
+  location_created_country_code: true
+  location_created_sublocation: true
+  location_created_location_name: true  # For venue/hotel names
+
+  # Descriptive text (HIGH PRIORITY - rich narratives found)
+  caption_abstract: true
+  description: true
+  user_comment: true
+  image_description: true
+
+  # Keywords (HIGH PRIORITY - names, institutions, events)
+  keywords: true
+  subject: true
+
+  # Film roll info (LOW PRIORITY - not found in samples)
+  image_unique_id: false  # Disabled - no APS roll IDs found
+  image_number: false     # Disabled - no frame numbers found
+
+  # Processing metadata
+  software: true
+  processing_software: true
+
+# Output Format
+output:
+  proposal_format: "compact"  # or "detailed"
+  include_confidence_scores: true
+  include_original_ocr_text: true
+  include_current_exif: true  # REQUIRED: Show existing EXIF values
+  group_by_directory: true
+  highlight_discrepancies: true
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "fastfoto_ocr.log"
+  console: true
+  include_timestamps: true
+  log_api_calls: true
+  log_geocoding: true
