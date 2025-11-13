@@ -9,7 +9,9 @@ Generates structured prompts optimized for the analysis results:
 """
 
 # Main OCR extraction prompt template
-PHOTO_BACK_OCR_PROMPT = """🚨 TRANSCRIBE ALL TEXT VERBATIM - NO COMMENTARY OR DESCRIPTIONS 🚨
+PHOTO_BACK_OCR_PROMPT = """🚨 CRITICAL REQUIREMENTS 🚨
+1. TRANSCRIBE ALL TEXT VERBATIM - NO COMMENTARY OR DESCRIPTIONS
+2. ALL DATES MUST BE IN YYYY-MM-DD FORMAT (ISO STANDARD)
 
 Analyze this photo back scan and extract structured metadata for EXIF enrichment.
 
@@ -79,7 +81,7 @@ Analyze this photo back scan and extract structured metadata for EXIF enrichment
     "text": "exact text found (if any)",
     "roll_id": "###-###",
     "frame": "##",
-    "date": "YYYY-MM-DD (ISO format, null if none)",
+    "date": "YYYY-MM-DD format ONLY - e.g. 1994-11-26 (null if none)",
     "date_original": "exact text as written on photo",
     "time": "HH:MM AM/PM",
     "lab_code": "CODE"
@@ -90,7 +92,7 @@ Analyze this photo back scan and extract structured metadata for EXIF enrichment
     "text": "exact text found (if any)",
     "roll_id": "ID###-###",
     "frame": "##",
-    "date": "YYYY-MM-DD (ISO format, null if none)",
+    "date": "YYYY-MM-DD format ONLY - e.g. 1994-11-26 (null if none)",
     "date_original": "exact text as written",
     "time": "HH:MM AM/PM"
   },
@@ -103,7 +105,7 @@ Analyze this photo back scan and extract structured metadata for EXIF enrichment
 
   "zone_4_handwritten": {
     "found": true/false,
-    "dates": ["dates in YYYY-MM-DD format"],
+    "dates": ["dates in YYYY-MM-DD format ONLY - e.g. 1994-11-26, 1985-01-31"],
     "dates_original": ["exact date text as written"],
     "locations": ["list all locations mentioned"],
     "people": ["list all names"],
@@ -113,7 +115,7 @@ Analyze this photo back scan and extract structured metadata for EXIF enrichment
   },
 
   "all_dates_found": [
-    "ALL dates from ALL zones in YYYY-MM-DD format"
+    "ALL dates from ALL zones in YYYY-MM-DD format ONLY - e.g. 1994-11-26, 1985-01-31"
   ],
   "all_dates_original": [
     "exact date texts as written on photo"
