@@ -117,7 +117,7 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
     "exact date texts as written on photo"
   ],
 
-  "raw_ocr_complete": "full transcription of everything visible"
+  "raw_ocr_complete": "VERBATIM transcription of ALL text - do NOT summarize, provide exact words/characters visible"
 }
 ```
 
@@ -134,6 +134,15 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
 - Roman numerals: I=01, II=02, III=03, IV=04, V=05, VI=06, VII=07, VIII=08, IX=09, X=10, XI=11, XII=12
 - Spanish events: "Año Nuevo" = January 1, "Navidad" = December 25
 - Examples: "1-31-85" → "1985-01-31", "26/XI/94" → "1994-11-26", "Año Nuevo 96" → "1996-01-01"
+
+**CRITICAL - raw_ocr_complete Field**:
+- MUST contain VERBATIM transcription of ALL visible text
+- Do NOT describe, summarize, or comment on the text
+- Do NOT say "handwritten text" or "appears to be" - just transcribe it
+- Include ALL text: names, dates, notes, captions, everything
+- Use [illegible] only for truly unreadable characters
+- Example: "Bruce 01/02/98 Fuimos a la playa muy bonita..."
+- NOT: "Bruce written with date plus Spanish diary entries"
 
 **General**:
 - Report small/faint text even with low confidence
