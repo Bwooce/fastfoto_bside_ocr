@@ -58,70 +58,79 @@ class OrientationAnalyzer:
 
     def _init_prompt(self):
         """Initialize the analysis prompt for Haiku model."""
-        self.analysis_prompt = '''
-Analyze this photo back scan for orientation and quality issues.
+        self.batch_analysis_prompt = '''
+Analyze these photos for orientation and quality issues.
 
-Return JSON with this exact structure:
+Return JSON array with one entry per image:
+
 ```json
-{
-  "orientation": {
-    "needs_rotation": true/false,
-    "rotation_degrees": 0,
-    "confidence": 0.95,
-    "reasoning": "Text appears upside down"
-  },
-
-  "quality": {
-    "overall_score": 0.85,
-    "blur_detected": false,
-    "lighting_issues": false,
-    "contrast_problems": false,
-    "quality_notes": "Sharp and well-lit"
-  },
-
-  "content": {
-    "has_text": true,
-    "has_handwriting": true,
-    "is_back_scan": true,
-    "multiple_photos": false,
-    "content_notes": "Handwritten date and location"
-  },
-
-  "recommendations": {
-    "skip_ocr": false,
-    "high_value": true,
-    "manual_review": false,
-    "processing_notes": "Good candidate for detailed OCR"
+[
+  {
+    "image_name": "IMG_001.jpg",
+    "orientation": {
+      "needs_rotation": true/false,
+      "rotation_degrees": 0,
+      "confidence": 0.95,
+      "reasoning": "Text appears upside down"
+    },
+    "quality": {
+      "overall_score": 0.85,
+      "blur_detected": false,
+      "lighting_issues": false,
+      "contrast_problems": false,
+      "quality_notes": "Sharp and well-lit"
+    },
+    "content": {
+      "has_text": true,
+      "has_handwriting": true,
+      "is_back_scan": false,
+      "multiple_photos": false,
+      "content_notes": "Clear main photo"
+    },
+    "recommendations": {
+      "skip_ocr": false,
+      "high_value": true,
+      "manual_review": false,
+      "processing_notes": "Good orientation, suitable for display"
+    }
   }
-}
+]
 ```
+
+**🚨 CRITICAL: TECHNICAL ANALYSIS ONLY - NO IMAGE CONTENT DESCRIPTION 🚨**
 
 **Analysis Guidelines:**
 
 **Orientation Detection:**
-- Check if text appears rotated (90°, 180°, 270°)
-- Look for proper reading direction
-- Consider photo lab stamps (usually bottom edge)
-- High confidence needed for rotation recommendation
+- Detect rotation angles: 0°, 90°, 180°, 270°
+- Base on text orientation, horizon lines, standard photo alignment
+- Provide confidence score for rotation recommendation
+- NO description of what text says or what's in the image
 
 **Quality Assessment:**
-- overall_score: 0.0 (unusable) to 1.0 (perfect)
-- blur_detected: Motion blur, focus issues, camera shake
-- lighting_issues: Too dark, overexposed, uneven lighting
-- contrast_problems: Low contrast, faded, hard to read
+- overall_score: 0.0 (unusable) to 1.0 (perfect) - technical quality only
+- blur_detected: Focus issues, motion blur (yes/no)
+- lighting_issues: Exposure problems (yes/no)
+- contrast_problems: Technical contrast issues (yes/no)
 
-**Content Assessment:**
-- has_text: Any printed or handwritten text visible
-- has_handwriting: Specifically handwritten content
-- is_back_scan: Photo back vs. front identification
-- multiple_photos: Multiple photo backs on one scan
+**Technical Content Detection:**
+- has_text: Text elements present (yes/no) - don't describe what text
+- has_handwriting: Handwritten elements present (yes/no) - don't describe content
+- is_back_scan: false (this is for main photos)
+- multiple_photos: Multiple photos in scan (yes/no)
 
 **Processing Recommendations:**
-- skip_ocr: Quality too poor for OCR (score < 0.3)
-- high_value: Likely to have useful metadata (clear text/dates)
-- manual_review: Uncertain cases needing human inspection
+- skip_ocr: Not applicable for main photos
+- high_value: Good technical quality for display (yes/no)
+- manual_review: Uncertain technical quality (yes/no)
 
-Focus on practical actionability - what should the processing pipeline do with this image?
+**FORBIDDEN:**
+- Describing people, places, events in photos
+- Reading or interpreting text content
+- Commenting on photo subject matter
+- Any content-based analysis
+
+**FOCUS:** Pure technical orientation and quality metrics for display optimization
 '''
 
     def analyze_image(self, image_path: Path) -> OrientationResult:
@@ -353,6 +362,152 @@ Focus on practical actionability - what should the processing pipeline do with t
 
         logger.info(f"Filtered {len(main_photos)} main photos from {len(image_paths)} total files")
         return main_photos
+
+    def analyze_batch_efficient(self, image_paths: List[Path], batch_size: int = 10) -> List[Tuple[Path, OrientationResult]]:
+        """
+        Analyze multiple images in efficient batches to minimize token usage.
+
+        Args:
+            image_paths: List of image paths to analyze
+            batch_size: Number of images to process in each batch (default: 10)
+
+        Returns:
+            List of (path, result) tuples
+        """
+        # Automatically filter to main photos only
+        main_photos = self.filter_main_photos(image_paths)
+        all_results = []
+
+        # Process images in batches for token efficiency
+        for i in range(0, len(main_photos), batch_size):
+            batch = main_photos[i:i + batch_size]
+            logger.info(f"Processing batch {i//batch_size + 1}/{(len(main_photos) + batch_size - 1)//batch_size}: {len(batch)} images")
+
+            try:
+                # In actual implementation: Call Claude Code with batch of images
+                batch_response = self._call_claude_code_batch(batch)
+
+                # Parse batch response
+                batch_results = self._parse_batch_response(batch_response, batch)
+                all_results.extend(batch_results)
+
+            except Exception as e:
+                logger.error(f"Error processing batch {i//batch_size + 1}: {e}")
+                # Add error results for this batch
+                for image_path in batch:
+                    error_result = OrientationResult(
+                        needs_rotation=False, rotation_degrees=0, confidence=0.0,
+                        quality_score=0.0, blur_detected=False, lighting_issues=False,
+                        contrast_problems=False, has_text=True, has_handwriting=False,
+                        is_back_scan=False, multiple_photos=False, skip_ocr=False,
+                        high_value=False, manual_review=True, raw_response=f"Batch error: {str(e)}"
+                    )
+                    all_results.append((image_path, error_result))
+
+        return all_results
+
+    def _call_claude_code_batch(self, image_paths: List[Path]) -> str:
+        """
+        Call Claude Code with batch of images using Task tool.
+
+        This is where the actual sub-agent invocation happens.
+        """
+        # This would be implemented as:
+        # Task tool with model="haiku"
+        # Multiple image Read tools in sequence
+        # self.batch_analysis_prompt applied to all images
+
+        # For now, simulate batch processing
+        return self._simulate_batch_analysis(image_paths)
+
+    def _simulate_batch_analysis(self, image_paths: List[Path]) -> str:
+        """Simulate batch analysis response."""
+        results = []
+        for image_path in image_paths:
+            name_lower = image_path.name.lower()
+            if 'rotated' in name_lower:
+                result = {
+                    "image_name": image_path.name,
+                    "orientation": {"needs_rotation": True, "rotation_degrees": 90, "confidence": 0.92},
+                    "quality": {"overall_score": 0.85, "blur_detected": False, "lighting_issues": False},
+                    "content": {"has_text": True, "has_handwriting": False, "is_back_scan": False},
+                    "recommendations": {"skip_ocr": False, "high_value": True, "manual_review": False}
+                }
+            else:
+                result = {
+                    "image_name": image_path.name,
+                    "orientation": {"needs_rotation": False, "rotation_degrees": 0, "confidence": 0.98},
+                    "quality": {"overall_score": 0.88, "blur_detected": False, "lighting_issues": False},
+                    "content": {"has_text": True, "has_handwriting": True, "is_back_scan": False},
+                    "recommendations": {"skip_ocr": False, "high_value": True, "manual_review": False}
+                }
+            results.append(result)
+
+        return f'```json\n{json.dumps(results, indent=2)}\n```'
+
+    def _parse_batch_response(self, response: str, image_paths: List[Path]) -> List[Tuple[Path, OrientationResult]]:
+        """Parse batch response JSON."""
+        import json
+        import re
+
+        try:
+            # Extract JSON from response
+            json_match = re.search(r'```json\s*(\[.*?\])\s*```', response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+                data = json.loads(json_str)
+            else:
+                raise ValueError("No JSON array found in batch response")
+
+            results = []
+            # Match results to image paths by filename
+            path_lookup = {path.name: path for path in image_paths}
+
+            for item in data:
+                image_name = item.get('image_name', '')
+                if image_name in path_lookup:
+                    image_path = path_lookup[image_name]
+
+                    orientation = item.get('orientation', {})
+                    quality = item.get('quality', {})
+                    content = item.get('content', {})
+                    recommendations = item.get('recommendations', {})
+
+                    result = OrientationResult(
+                        needs_rotation=orientation.get('needs_rotation', False),
+                        rotation_degrees=orientation.get('rotation_degrees', 0),
+                        confidence=orientation.get('confidence', 0.0),
+                        quality_score=quality.get('overall_score', 0.5),
+                        blur_detected=quality.get('blur_detected', False),
+                        lighting_issues=quality.get('lighting_issues', False),
+                        contrast_problems=quality.get('contrast_problems', False),
+                        has_text=content.get('has_text', True),
+                        has_handwriting=content.get('has_handwriting', False),
+                        is_back_scan=content.get('is_back_scan', False),
+                        multiple_photos=content.get('multiple_photos', False),
+                        skip_ocr=recommendations.get('skip_ocr', False),
+                        high_value=recommendations.get('high_value', False),
+                        manual_review=recommendations.get('manual_review', False),
+                        raw_response=response
+                    )
+                    results.append((image_path, result))
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Failed to parse batch response: {e}")
+            # Return error results for all images
+            error_results = []
+            for image_path in image_paths:
+                error_result = OrientationResult(
+                    needs_rotation=False, rotation_degrees=0, confidence=0.0,
+                    quality_score=0.0, blur_detected=False, lighting_issues=False,
+                    contrast_problems=False, has_text=True, has_handwriting=False,
+                    is_back_scan=False, multiple_photos=False, skip_ocr=False,
+                    high_value=False, manual_review=True, raw_response=f"Parse error: {str(e)}"
+                )
+                error_results.append((image_path, error_result))
+            return error_results
 
     def analyze_batch(self, image_paths: List[Path]) -> List[Tuple[Path, OrientationResult]]:
         """

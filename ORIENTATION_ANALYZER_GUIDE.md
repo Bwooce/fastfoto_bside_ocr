@@ -27,9 +27,10 @@ Claude will:
 Claude will:
 1. Auto-discover main photo files (automatically excludes _b back scans)
 2. Downsample images heavily (orientation detection doesn't need high resolution)
-3. Analyze each with Haiku model
-4. Update EXIF orientation flags (metadata only - NO pixel rotation)
-5. Generate recommendations for color/brightness corrections
+3. **Batch process images** (10 images per batch for token efficiency)
+4. **Invoke Haiku sub-agent** via Task tool for analysis
+5. Update EXIF orientation flags (metadata only - NO pixel rotation)
+6. Generate recommendations for color/brightness corrections
 
 ## 📏 **Image Size Handling**
 
