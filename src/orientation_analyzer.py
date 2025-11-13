@@ -374,6 +374,62 @@ Focus on practical actionability - what should the processing pipeline do with t
 
         return results
 
+    def apply_orientation_fixes(self, results: List[Tuple[Path, OrientationResult]]) -> Dict:
+        """
+        Apply EXIF orientation fixes to images that need rotation.
+
+        Args:
+            results: List of (path, result) tuples from analysis
+
+        Returns:
+            Dict with fix statistics
+        """
+        from exif_writer import ExifWriter
+
+        exif_writer = ExifWriter()
+        fixed_count = 0
+        failed_count = 0
+        skipped_count = 0
+
+        for image_path, result in results:
+            if not result.needs_rotation:
+                skipped_count += 1
+                continue
+
+            try:
+                # Map rotation degrees to EXIF orientation values
+                orientation_map = {
+                    0: 1,    # Normal
+                    90: 6,   # Rotate 90 CW
+                    180: 3,  # Rotate 180
+                    270: 8   # Rotate 90 CCW
+                }
+
+                orientation_value = orientation_map.get(result.rotation_degrees, 1)
+
+                # Update EXIF orientation flag
+                metadata = {"Orientation": orientation_value}
+                success = exif_writer.write_exif(image_path, metadata, overwrite_original=True)
+
+                if success:
+                    fixed_count += 1
+                    logger.info(f"Fixed orientation for {image_path.name}: {result.rotation_degrees}°")
+                else:
+                    failed_count += 1
+                    logger.error(f"Failed to update EXIF for {image_path.name}")
+
+            except Exception as e:
+                failed_count += 1
+                logger.error(f"Error fixing {image_path.name}: {e}")
+
+        return {
+            "total_processed": len(results),
+            "fixed": fixed_count,
+            "failed": failed_count,
+            "skipped": skipped_count,
+            "success_rate": f"{(fixed_count / len(results)) * 100:.1f}%" if results else "0%"
+        }
+
     def generate_report(self, results: List[Tuple[Path, OrientationResult]]) -> Dict:
         """Generate summary report from batch analysis."""
         if not results:

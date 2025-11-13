@@ -143,17 +143,23 @@ Analyze this photo back scan and extract structured metadata for EXIF enrichment
 **🚨 CRITICAL - raw_ocr_complete Field 🚨**:
 - TRANSCRIBE EVERY SINGLE CHARACTER you can see
 - NEVER describe what the text is about
-- NEVER use phrases like "handwritten text about", "appears to be", "inverted text about"
+- NEVER use phrases like "handwritten text about", "appears to be", "rotated text about", "inverted text about"
 - If you see "Fuimos a la playa muy bonita el domingo" - write exactly that
-- If text is rotated, rotate and transcribe it - don't say "inverted text about vacation"
+- If text is rotated, read and transcribe it - don't describe the orientation
 - If text is faint, transcribe what you can see - don't say "faint writing"
 - If you cannot read specific words, use [illegible] for those words only
 
-❌ WRONG: "Inverted handwritten Spanish text about Holland vacation experiences"
+❌ WRONG: "Rotated handwritten Spanish text about Holland vacation experiences"
 ✅ CORRECT: "Kodak Advanced Photo System 99/JUN/7 11:33AM ID529-981 <25> 1KN44 Fuimos a Holland fue increible las tulipas eran [illegible] muy bonitas"
 
 ❌ WRONG: "Name written vertically with date plus Spanish diary entries"
 ✅ CORRECT: "Roberto 01/02/98 La playa estaba perfecta hoy nadamos mucho tiempo"
+
+**Processing Codes and Technical Text**:
+- Transcribe photo lab codes, processing numbers, technical markings verbatim
+- Don't try to interpret or comment on technical codes
+- Focus extraction effort on human-meaningful content (dates, locations, names, events)
+- Example: "16ML1705 VPJ 016 926 420 425 020" → transcribe exactly as seen
 
 **General**:
 - Report small/faint text even with low confidence
