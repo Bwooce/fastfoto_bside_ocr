@@ -38,13 +38,13 @@ Claude will:
 
 **Orientation Detection Requirements:**
 - **Purpose**: Detect rotation (90°, 180°, 270°), color balance
-- **Resolution needed**: Very low! 600-800px max dimension is plenty
-- **File size**: Can be ~500KB-1MB (much smaller than OCR analysis)
+- **Resolution needed**: VERY low! 300-400px max dimension is sufficient
+- **File size**: Target ~100-200KB (much smaller than OCR analysis)
 
 **Your Main Photo Collection:**
 - Typical main photos: 3000-6000px dimension, 20-100MB
-- **Downsampled for orientation**: 600px dimension, ~500KB
-- **Result**: Much faster processing, optimized for visual analysis!
+- **Downsampled for orientation**: 300px dimension, ~100KB
+- **Result**: Massive token savings, sufficient for rotation detection!
 
 ### 🎯 **Workflow Integration**
 
@@ -53,11 +53,11 @@ Claude will:
 User: "Analyze orientation and color quality of main FastFoto photos using Haiku model"
 
 Claude:
-1. Auto-downsamples large images to ~600px (orientation analysis only)
-2. Analyzes ALL main photos with Haiku model
-3. Updates EXIF orientation flags (metadata only - preserves original pixels)
-4. Suggests color/brightness adjustments
-5. Creates batch processing script for color corrections
+1. Auto-downsamples large images to ~300px (orientation analysis only)
+2. **Batch processes** main photos (10 per batch for token efficiency)
+3. Analyzes with Haiku model using minimal tokens
+4. Updates EXIF orientation flags (metadata only - preserves original pixels)
+5. Suggests color/brightness adjustments
 ```
 
 **Separate from Back Scan OCR:**
@@ -121,9 +121,9 @@ Claude: I'll analyze the main photo collection for orientation and color issues 
 Processing main photo collection...
 [Auto-excludes _b back scan files]
 [Filtered 4,847 main photos from 5,347 total files]
-[Auto-downsamples to ~600px for orientation analysis]
-[Uses Task tool with model="haiku"]
-[Processes main photo collection in batches]
+[Auto-downsamples to ~300px for orientation analysis]
+[Batch processing: 485 batches of 10 images each]
+[Uses Task tool with model="haiku" for token efficiency]
 
 Results:
 📊 Orientation Analysis Summary:
