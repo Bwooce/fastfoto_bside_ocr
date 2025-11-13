@@ -17,8 +17,13 @@
 - **Don't suggest breaking sessions** - work through the entire collection
 - For 150+ image collections, show progress but **never stop mid-stream**
 
+## Project Workflow Guidelines
+- Follow `CLAUDE_CODE_SESSION_GUIDE.md` for complete FastFoto OCR workflow instructions
+- **Follow project-specific instructions exactly as written** - they override default behaviors
+- **Pay special attention to anti-demonstration and anti-optimization instructions**
+- **Project guides specify complete processing requirements vs. sample demonstrations**
+
 ## Critical OCR Instructions
-- Follow `CLAUDE_CODE_SESSION_GUIDE.md` for complete FastFoto OCR workflow
 - **Verbatim transcription only** - no commentary or descriptions in raw_ocr_complete field
 - **ISO YYYY-MM-DD date format** for all dates
 - **DD/MM/YY assumption** for ambiguous dates
