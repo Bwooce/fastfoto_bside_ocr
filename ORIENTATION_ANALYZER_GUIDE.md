@@ -6,6 +6,16 @@
 1. **Orientation Analyzer** → Main photo collection (~5000 images) → Orientation, color correction
 2. **OCR Analysis** → Back scans (_b files, ~500 images) → Metadata extraction
 
+## ⚠️ **CRITICAL: DO NOT WRITE NEW CODE OR SCRIPTS**
+
+**The orientation analyzer already exists and works perfectly!**
+
+- ✅ **Use existing tools**: `src/orientation_analyzer.py`
+- ✅ **Follow simple instructions below**
+- ❌ **DO NOT write new scripts or code**
+- ❌ **DO NOT create run_orientation_check.py or similar**
+- ❌ **DO NOT implement EnhancedInteractiveProcessor**
+
 ## 🚀 How to Invoke in Claude Code Sessions
 
 ### Method 1: Direct Analysis (Single Main Photo)
@@ -85,33 +95,9 @@ Claude:
 
 ## 🔧 **Integration with Current Workflow**
 
-### Enhanced Interactive Processor
+**The orientation analyzer integrates with the existing workflow - no new code needed!**
 
-```python
-class EnhancedInteractiveProcessor:
-    def __init__(self):
-        self.orientation_analyzer = OrientationAnalyzer()
-        self.interactive_processor = InteractiveProcessor()
-
-    def process_with_optimization(self, directory: Path):
-        # Phase 1: Orientation analysis (cheap)
-        print("Phase 1: Analyzing orientation and quality...")
-        orientation_results = self.orientation_analyzer.analyze_batch(image_paths)
-
-        # Filter based on quality
-        high_value_images = [
-            path for path, result in orientation_results
-            if result.high_value and not result.skip_ocr
-        ]
-
-        print(f"Quality filter: {len(high_value_images)}/{len(image_paths)} images worth processing")
-
-        # Phase 2: Detailed OCR (expensive)
-        print("Phase 2: Detailed OCR on high-value images...")
-        ocr_results = self.interactive_processor.process_directory(high_value_images)
-
-        return orientation_results, ocr_results
-```
+The existing `src/orientation_analyzer.py` handles all orientation analysis automatically when you use the recommended phrase.
 
 ## 🎯 **Technical Benefits**
 
@@ -182,7 +168,7 @@ No orientation issues found in this batch ✓
 1. **Efficient Processing**: Haiku model optimized for visual analysis tasks
 2. **Aggressive Downsampling**: 600px is plenty for orientation detection
 3. **Separate Purpose**: Main photos (orientation) vs back scans (metadata)
-4. **Batch Corrections**: Generate scripts for bulk rotation/color fixes
+4. **Batch Corrections**: Provides EXIF orientation recommendations for bulk fixes
 5. **Complementary Workflow**: Works alongside back scan OCR processing
 
 **Bottom Line**: Use this for orientation/color analysis of your main photo collection, while using the existing OCR workflow for back scan metadata extraction!
