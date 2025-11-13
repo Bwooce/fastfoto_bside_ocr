@@ -30,3 +30,26 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# FastFoto OCR - Protect PII and personal data
+test_samples/
+test_analysis_results.md
+*_analysis*.md
+*_analysis*.txt
+exif_updates_proposal.txt
+*.log
+processed/
+resized/
+/tmp/
+.geocoding_cache.json
+
+# Personal photo directories (examples)
+*.jpg
+*.jpeg
+*.tiff
+*.tif
+*.JPG
+*.JPEG
+*.TIFF
+*.TIF
+*_b.*

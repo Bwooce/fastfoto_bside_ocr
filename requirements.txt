@@ -1,0 +1,32 @@
+# FastFoto OCR Requirements
+# Python 3.10+
+
+# Claude Vision API (for OCR)
+anthropic>=0.40.0
+
+# Image processing
+Pillow>=10.0.0
+
+# EXIF metadata
+# Note: Requires exiftool to be installed separately
+# macOS: brew install exiftool
+# Linux: apt-get install libimage-exiftool-perl
+
+# Configuration
+PyYAML>=6.0
+
+# Date parsing
+python-dateutil>=2.8.0
+
+# Geocoding (optional - for location lookup)
+geopy>=2.3.0
+
+# Progress bars
+tqdm>=4.65.0
+
+# Colored terminal output
+colorama>=0.4.6
+
+# File type detection
+python-magic>=0.4.27; platform_system != "Windows"
+python-magic-bin>=0.4.14; platform_system == "Windows"
