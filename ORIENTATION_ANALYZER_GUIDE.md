@@ -28,7 +28,7 @@ Claude will:
 1. Discover all main photo files (not _b back scans)
 2. Downsample images heavily (orientation detection doesn't need high resolution)
 3. Analyze each with Haiku model
-4. Automatically fix EXIF orientation flags for rotated images
+4. Update EXIF orientation flags (metadata only - NO pixel rotation)
 5. Generate recommendations for color/brightness corrections
 
 ## 📏 **Image Size Handling**
@@ -54,7 +54,7 @@ User: "Analyze orientation and color quality of main FastFoto photos using Haiku
 Claude:
 1. Auto-downsamples large images to ~600px (orientation analysis only)
 2. Analyzes ALL main photos with Haiku model
-3. Automatically fixes EXIF orientation flags for rotated images
+3. Updates EXIF orientation flags (metadata only - preserves original pixels)
 4. Suggests color/brightness adjustments
 5. Creates batch processing script for color corrections
 ```
@@ -106,6 +106,8 @@ class EnhancedInteractiveProcessor:
 - Haiku perfect for orientation detection (doesn't need fine detail)
 - Sonnet focused on text extraction (where detail matters)
 - Aggressive downsampling reduces processing overhead
+- **Non-destructive EXIF updates**: Original pixels preserved, metadata-only fixes
+- **Universal compatibility**: Apple Photos, Google Photos, Adobe Lightroom respect EXIF orientation
 - Batch processing recommendations for efficient corrections
 
 ## 🎯 **Sample Claude Code Session**
@@ -129,8 +131,9 @@ Results:
 - Color correction needed: 567 images (11.7%)
 - Good as-is: 3,945 images (81.4%)
 
-🚀 Auto-Applied Fixes:
-- Fixed EXIF orientation: 335 images (100% success rate)
+🚀 Auto-Applied EXIF Updates:
+- Updated orientation flags: 335 images (metadata only - no pixel changes)
+- Photo viewers (Apple Photos, Google Photos) will now display correctly
 - Color correction recommendations: 567 images
 - Generated batch processing script for color fixes
 
