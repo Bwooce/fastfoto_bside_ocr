@@ -218,6 +218,48 @@ Good luck! 📸
     return instructions
 
 
+def parse_claude_response(response: str) -> dict:
+    """
+    Parse Claude's JSON response from photo back OCR analysis.
+
+    Args:
+        response: Raw response from Claude's Read tool
+
+    Returns:
+        Parsed JSON data as dictionary
+
+    Raises:
+        ValueError: If response is not valid JSON
+    """
+    import json
+    import re
+
+    # Clean up the response - sometimes Claude includes markdown or explanations
+    response = response.strip()
+
+    # Look for JSON content between ```json and ``` or just find JSON object
+    json_pattern = r'```json\s*(\{.*?\})\s*```'
+    match = re.search(json_pattern, response, re.DOTALL)
+
+    if match:
+        json_str = match.group(1)
+    else:
+        # Try to find JSON object in response
+        json_start = response.find('{')
+        json_end = response.rfind('}')
+
+        if json_start != -1 and json_end != -1 and json_end > json_start:
+            json_str = response[json_start:json_end + 1]
+        else:
+            # Fallback - use entire response
+            json_str = response
+
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse Claude response as JSON: {e}\nResponse: {response[:200]}...")
+
+
 if __name__ == "__main__":
     # Test/demo
     print("=== FastFoto OCR Prompt Generator ===\n")
