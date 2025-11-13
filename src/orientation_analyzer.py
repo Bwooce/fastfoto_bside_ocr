@@ -376,7 +376,11 @@ Focus on practical actionability - what should the processing pipeline do with t
 
     def apply_orientation_fixes(self, results: List[Tuple[Path, OrientationResult]]) -> Dict:
         """
-        Apply EXIF orientation fixes to images that need rotation.
+        Apply EXIF orientation flags to images that need rotation.
+
+        IMPORTANT: This only updates EXIF metadata, NOT the image pixels.
+        Modern photo viewers (Apple Photos, Google Photos) respect EXIF orientation
+        and will display the image correctly without pixel manipulation.
 
         Args:
             results: List of (path, result) tuples from analysis
@@ -407,16 +411,16 @@ Focus on practical actionability - what should the processing pipeline do with t
 
                 orientation_value = orientation_map.get(result.rotation_degrees, 1)
 
-                # Update EXIF orientation flag
+                # Update EXIF orientation flag (metadata only - no pixel rotation)
                 metadata = {"Orientation": orientation_value}
                 success = exif_writer.write_exif(image_path, metadata, overwrite_original=True)
 
                 if success:
                     fixed_count += 1
-                    logger.info(f"Fixed orientation for {image_path.name}: {result.rotation_degrees}°")
+                    logger.info(f"Updated EXIF orientation for {image_path.name}: {result.rotation_degrees}° (metadata only)")
                 else:
                     failed_count += 1
-                    logger.error(f"Failed to update EXIF for {image_path.name}")
+                    logger.error(f"Failed to update EXIF orientation for {image_path.name}")
 
             except Exception as e:
                 failed_count += 1
