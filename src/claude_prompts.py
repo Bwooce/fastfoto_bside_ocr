@@ -77,7 +77,8 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
     "text": "exact text found (if any)",
     "roll_id": "###-###",
     "frame": "##",
-    "date": "any format",
+    "date": "YYYY-MM-DD (ISO format, null if none)",
+    "date_original": "exact text as written on photo",
     "time": "HH:MM AM/PM",
     "lab_code": "CODE"
   },
@@ -87,7 +88,8 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
     "text": "exact text found (if any)",
     "roll_id": "ID###-###",
     "frame": "##",
-    "date": "any format",
+    "date": "YYYY-MM-DD (ISO format, null if none)",
+    "date_original": "exact text as written",
     "time": "HH:MM AM/PM"
   },
 
@@ -99,7 +101,8 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
 
   "zone_4_handwritten": {
     "found": true/false,
-    "dates": ["list all dates in any format"],
+    "dates": ["dates in YYYY-MM-DD format"],
+    "dates_original": ["exact date text as written"],
     "locations": ["list all locations mentioned"],
     "people": ["list all names"],
     "events": ["list all events"],
@@ -108,7 +111,10 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
   },
 
   "all_dates_found": [
-    "list ALL dates from ALL zones, in the format they appear"
+    "ALL dates from ALL zones in YYYY-MM-DD format"
+  ],
+  "all_dates_original": [
+    "exact date texts as written on photo"
   ],
 
   "raw_ocr_complete": "full transcription of everything visible"
@@ -118,8 +124,18 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
 **Instructions**:
 - Return ONLY valid JSON
 - Use `null` for missing fields
-- Focus on FINDING text in the zones, not parsing/formatting
-- List dates exactly as they appear - don't try to standardize them
+- Focus on FINDING text in the zones
+
+**Date Parsing Rules**:
+- Convert ALL dates to YYYY-MM-DD format (ISO standard)
+- Preserve original text in `*_original` fields
+- For ambiguous 2-digit years: 00-30 = 20xx, 31-99 = 19xx
+- Spanish months: enero=01, febrero=02, marzo=03, abril=04, mayo=05, junio=06, julio=07, agosto=08, septiembre=09, octubre=10, noviembre=11, diciembre=12
+- Roman numerals: I=01, II=02, III=03, IV=04, V=05, VI=06, VII=07, VIII=08, IX=09, X=10, XI=11, XII=12
+- Spanish events: "Año Nuevo" = January 1, "Navidad" = December 25
+- Examples: "1-31-85" → "1985-01-31", "26/XI/94" → "1994-11-26", "Año Nuevo 96" → "1996-01-01"
+
+**General**:
 - Report small/faint text even with low confidence
 """
 
@@ -255,9 +271,14 @@ def parse_claude_response(response: str) -> dict:
             json_str = response
 
     try:
-        return json.loads(json_str)
+        data = json.loads(json_str)
+
+        # Claude should now return ISO dates directly based on updated prompt
+        # No post-processing needed!
+        return data
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse Claude response as JSON: {e}\nResponse: {response[:200]}...")
+
 
 
 if __name__ == "__main__":

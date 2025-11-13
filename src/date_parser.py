@@ -26,6 +26,17 @@ class DateParser:
         'septiembre': 9, 'octubre': 10, 'noviembre': 11, 'diciembre': 12
     }
 
+    # Spanish event-based dates mapping
+    SPANISH_EVENTS = {
+        'año nuevo': (1, 1),        # New Year's Day
+        'navidad': (12, 25),        # Christmas
+        'nochebuena': (12, 24),     # Christmas Eve
+        'nochevieja': (12, 31),     # New Year's Eve
+        'año new': (1, 1),          # Variations
+        'new year': (1, 1),         # English equivalent
+        'christmas': (12, 25)       # English equivalent
+    }
+
     # 3-letter month codes (APS format)
     MONTH_CODES = {
         'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5, 'JUN': 6,
@@ -59,7 +70,12 @@ class DateParser:
         date_str = date_str.strip()
 
         try:
-            # Try Spanish month replacement first
+            # Try Spanish event-based dates first
+            event_result = self._parse_spanish_events(date_str)
+            if event_result:
+                return event_result
+
+            # Try Spanish month replacement
             date_normalized = self._normalize_spanish(date_str)
 
             # Try dateutil parser (handles most formats)
@@ -107,6 +123,43 @@ class DateParser:
                 logger.debug(f"Replaced Spanish month: {spanish} -> {english_months[month_num - 1]}")
 
         return normalized
+
+    def _parse_spanish_events(self, date_str: str) -> Optional[datetime]:
+        """
+        Parse Spanish event-based dates like "Año Nuevo 96".
+
+        Args:
+            date_str: Date string with Spanish event
+
+        Returns:
+            datetime object or None
+        """
+        normalized = date_str.lower().strip()
+
+        # Extract year from the string (look for 2-4 digit years)
+        year_match = re.search(r'\b(\d{2}|\d{4})\b', normalized)
+        year = None
+
+        if year_match:
+            year_str = year_match.group(1)
+            if len(year_str) == 2:
+                year = self._two_digit_year_to_full(int(year_str))
+            else:
+                year = int(year_str)
+
+        # Check for event patterns
+        for event_phrase, (month, day) in self.SPANISH_EVENTS.items():
+            if event_phrase in normalized:
+                if year:
+                    try:
+                        dt = datetime(year, month, day)
+                        logger.debug(f"Parsed Spanish event '{date_str}' -> {dt}")
+                        return dt
+                    except ValueError as e:
+                        logger.debug(f"Invalid Spanish event date values: {e}")
+                        continue
+
+        return None
 
     def _parse_custom(self, date_str: str) -> Optional[datetime]:
         """
