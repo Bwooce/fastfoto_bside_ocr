@@ -303,25 +303,21 @@ class FastFotoOrchestrator:
 
         return generator
 
-    def apply_proposal(self, proposal_path: Path, dry_run: bool = False) -> int:
+    def apply_proposal(self, proposal_path: Path, source_dir: Path, dry_run: bool = False) -> int:
         """
         Apply approved changes from proposal file.
 
         Args:
             proposal_path: Path to proposal file
+            source_dir: Directory containing original photos
             dry_run: If True, don't actually write EXIF
 
         Returns:
             Number of images updated
         """
-        # TODO: Parse proposal file and apply updates
-        # This requires:
-        # 1. Parsing the proposal file format
-        # 2. Checking for "SKIP:" markers
-        # 3. Applying each update via ExifWriter
-
-        logger.warning("apply_proposal() not yet implemented")
-        return 0
+        # Use interactive processor to apply the proposal
+        processor = InteractiveProcessor(config_path=self.config_path)
+        return processor.apply_proposal(proposal_path, source_dir=source_dir, dry_run=dry_run)
 
     def print_statistics(self):
         """Print processing statistics."""
@@ -354,10 +350,10 @@ Examples:
   python orchestrator.py scan ~/Photos/FastFoto --output proposal.txt
 
   # Apply approved changes from proposal
-  python orchestrator.py apply proposal.txt
+  python orchestrator.py apply proposal.txt ~/Photos/FastFoto
 
   # Dry run (don't actually write EXIF)
-  python orchestrator.py apply proposal.txt --dry-run
+  python orchestrator.py apply proposal.txt ~/Photos/FastFoto --dry-run
         """
     )
 
@@ -376,6 +372,7 @@ Examples:
     # Apply command
     apply_parser = subparsers.add_parser('apply', help='Apply proposal file updates')
     apply_parser.add_argument('proposal', type=Path, help='Proposal file to apply')
+    apply_parser.add_argument('directory', type=Path, help='Directory containing original photos')
     apply_parser.add_argument('--dry-run', action='store_true',
                              help="Don't actually write EXIF, just show what would be done")
     apply_parser.add_argument('--config', '-c', type=Path,
@@ -416,7 +413,7 @@ Examples:
 
         print(f"\nProposal file created: {args.output}")
         print("Review the file and make any edits, then run:")
-        print(f"  python orchestrator.py apply {args.output}")
+        print(f"  python orchestrator.py apply {args.output} {args.directory}")
 
     elif args.command == 'apply':
         # Apply proposal
@@ -426,10 +423,14 @@ Examples:
             print(f"Error: Proposal file not found: {args.proposal}")
             sys.exit(1)
 
+        if not args.directory.exists():
+            print(f"Error: Directory not found: {args.directory}")
+            sys.exit(1)
+
         if args.dry_run:
             print("DRY RUN MODE - No changes will be made")
 
-        updated = orchestrator.apply_proposal(args.proposal, dry_run=args.dry_run)
+        updated = orchestrator.apply_proposal(args.proposal, source_dir=args.directory, dry_run=args.dry_run)
 
         print(f"\nUpdated {updated} images")
 
