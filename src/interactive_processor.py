@@ -305,13 +305,13 @@ class InteractiveProcessor:
         Generate proposal file from analysis results.
 
         Args:
-            output_path: Path for proposal file (default: exif_updates_proposal.txt)
+            output_path: Path for proposal file (default: /tmp/exif_updates_proposal.txt)
 
         Returns:
             ProposalGenerator object
         """
         if output_path is None:
-            output_path = Path("exif_updates_proposal.txt")
+            output_path = Path("/tmp/exif_updates_proposal.txt")
 
         generator = ProposalGenerator(output_path)
 

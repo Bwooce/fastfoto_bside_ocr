@@ -366,8 +366,8 @@ Examples:
     # Scan command
     scan_parser = subparsers.add_parser('scan', help='Scan photos and generate proposal')
     scan_parser.add_argument('directory', type=Path, help='Directory containing photos')
-    scan_parser.add_argument('--output', '-o', type=Path, default='exif_updates_proposal.txt',
-                            help='Output proposal file (default: exif_updates_proposal.txt)')
+    scan_parser.add_argument('--output', '-o', type=Path, default='/tmp/exif_updates_proposal.txt',
+                            help='Output proposal file (default: /tmp/exif_updates_proposal.txt)')
     scan_parser.add_argument('--recursive', '-r', action='store_true', default=True,
                             help='Search subdirectories (default: True)')
     scan_parser.add_argument('--config', '-c', type=Path,
@@ -388,7 +388,7 @@ Examples:
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('fastfoto_ocr.log'),
+            logging.FileHandler('/tmp/fastfoto_ocr.log'),
             logging.StreamHandler()
         ]
     )
