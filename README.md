@@ -102,13 +102,15 @@ Start Claude Code and give it a simple command to process your entire FastFoto c
 "Process my FastFoto images in ~/Photos/FastFoto and generate a proposal file"
 ```
 
-**Claude Code will automatically:**
+**Claude Code will automatically process your COMPLETE collection:**
 1. **Discover** all `*_b.jpg` files in your directory
 2. **Preprocess** images (resize >3.5MB or >2000px to 1800px @ 85% quality)
-3. **Analyze** each back scan using OCR with Claude Vision
-4. **Extract** dates, locations, people, and descriptive text
-5. **Generate** proposal file showing all proposed EXIF updates
+3. **Analyze EVERY SINGLE back scan** using OCR with Claude Vision (no samples or demonstrations)
+4. **Extract** dates, locations, people, and descriptive text from each individual image
+5. **Generate** proposal file showing all proposed EXIF updates for entire collection
 6. **Display** statistics and next steps
+
+**Note:** This processes your entire collection, not just a demonstration. Processing time depends on collection size (allow ~10-18 seconds per image).
 
 **Example session:**
 ```

@@ -1,4 +1,10 @@
-# Brief for Local Claude CLI: FastFoto OCR Phase 2 Implementation
+# Claude Code Session Guide: FastFoto OCR
+
+## 🚨 CRITICAL RULE FOR CLAUDE 🚨
+
+**When a user asks to "process FastFoto images", you MUST process ALL images, not demonstrate with samples.**
+
+**NEVER DO DEMONSTRATIONS. ALWAYS COMPLETE THE FULL JOB.**
 
 ## Architecture Decision: Interactive Claude Code Mode
 
@@ -43,17 +49,42 @@ pip install -r requirements.txt
 "Process my FastFoto images in ~/Photos/FastFoto and generate a proposal file"
 ```
 
+## ⚠️ CRITICAL INSTRUCTION - NO DEMONSTRATIONS ⚠️
+
+**NEVER demonstrate with sample images. ALWAYS process the COMPLETE collection.**
+
+**When user says "Process my FastFoto images":**
+- ❌ **DO NOT** analyze only 4-5 sample images as a "demonstration"
+- ❌ **DO NOT** say "Let me demonstrate with a few samples"
+- ❌ **DO NOT** create fake/simulated statistics for unprocessed images
+- ✅ **DO** process EVERY SINGLE prepared image using the Read tool
+- ✅ **DO** show real progress through the entire collection
+- ✅ **DO** generate a proposal with ALL actual results
+
+**The user wants the complete job done, not a demo!**
+
 **Claude (you) will automatically:**
 1. **Run preprocessing** via Bash tool:
    - Execute `python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared`
    - Show preprocessing progress and statistics
 2. **Load mapping** file to understand original → prepared relationships
-3. **Analyze each image** using Read tool:
-   - Use Read tool with `PHOTO_BACK_OCR_PROMPT`
-   - Parse response with `parse_claude_response()`
-   - Extract metadata (dates, locations, text)
-4. **Generate proposal** file using `proposal_generator`
-5. **Present summary** to user with statistics
+3. **Analyze EVERY SINGLE prepared image** using Read tool:
+   - MANDATORY: Use Read tool on EACH AND EVERY prepared image file
+   - NO SHORTCUTS: Do not skip images or do "representative samples"
+   - FOR EACH IMAGE: Parse response with `parse_claude_response()`
+   - Extract metadata (dates, locations, text) from each individual image
+   - This takes ~10-18 seconds per image (be patient for large collections)
+   - SHOW PROGRESS: Display "Processing [X/TOTAL]" for each image as you go
+4. **Generate complete proposal** file using `proposal_generator` with ALL ACTUAL results
+5. **Present summary** to user with statistics for ENTIRE REAL collection
+
+**⚠️ ABSOLUTE REQUIREMENT: Process EVERY SINGLE IMAGE - NO DEMONSTRATIONS ⚠️**
+
+**Processing Time Expectations:**
+- Small collections (10-50 images): 3-15 minutes
+- Medium collections (50-200 images): 15-60 minutes
+- Large collections (200+ images): 1+ hours
+- Each image takes ~10-18 seconds to analyze with Read tool
 
 **User reviews proposal, then says:**
 ```
