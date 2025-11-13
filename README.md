@@ -110,7 +110,7 @@ Start Claude Code and give it a simple command to process your entire FastFoto c
 5. **Generate** proposal file showing all proposed EXIF updates for entire collection
 6. **Display** statistics and next steps
 
-**Note:** This processes your entire collection, not just a demonstration. Processing time depends on collection size (allow ~10-18 seconds per image).
+**Important:** Claude Code will process your entire collection without pausing for optimization suggestions. Processing time depends on collection size (allow ~10-18 seconds per image). Enhancement ideas will be provided after processing is complete.
 
 **Example session:**
 ```
