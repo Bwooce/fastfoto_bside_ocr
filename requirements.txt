@@ -1,8 +1,7 @@
 # FastFoto OCR Requirements
 # Python 3.10+
-
-# Claude Vision API (for OCR)
-anthropic>=0.40.0
+# NOTE: OCR is performed via Claude Code's Read tool (requires Claude Max subscription)
+#       No separate API key needed!
 
 # Image processing
 Pillow>=10.0.0
