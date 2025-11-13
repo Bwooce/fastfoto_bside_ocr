@@ -331,20 +331,45 @@ Focus on practical actionability - what should the processing pipeline do with t
             logger.debug(f"Response was: {response}")
             raise ValueError(f"Invalid response format: {e}")
 
+    def filter_main_photos(self, image_paths: List[Path]) -> List[Path]:
+        """
+        Filter to main photos only - exclude _b back scan files.
+
+        Args:
+            image_paths: List of all image paths
+
+        Returns:
+            List of main photo paths (excluding _b back scans)
+        """
+        main_photos = []
+
+        for image_path in image_paths:
+            # Skip back scan files (ending with _b.jpg, _b.jpeg, etc.)
+            if '_b.' in image_path.name.lower():
+                logger.debug(f"Skipping back scan: {image_path.name}")
+                continue
+
+            main_photos.append(image_path)
+
+        logger.info(f"Filtered {len(main_photos)} main photos from {len(image_paths)} total files")
+        return main_photos
+
     def analyze_batch(self, image_paths: List[Path]) -> List[Tuple[Path, OrientationResult]]:
         """
-        Analyze multiple images in batch.
+        Analyze multiple images in batch (main photos only - automatically excludes _b back scans).
 
         Args:
             image_paths: List of image paths to analyze
 
         Returns:
-            List of (path, result) tuples
+            List of (path, result) tuples for main photos only
         """
+        # Automatically filter to main photos only
+        main_photos = self.filter_main_photos(image_paths)
         results = []
 
-        for i, image_path in enumerate(image_paths):
-            logger.info(f"Analyzing [{i+1}/{len(image_paths)}]: {image_path.name}")
+        for i, image_path in enumerate(main_photos):
+            logger.info(f"Analyzing [{i+1}/{len(main_photos)}]: {image_path.name}")
 
             try:
                 result = self.analyze_image(image_path)
