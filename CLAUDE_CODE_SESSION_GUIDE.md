@@ -36,43 +36,24 @@ pip install -r requirements.txt
 # Linux: apt-get install libimage-exiftool-perl
 ```
 
-## New Workflow: Two-Step Process
-
-### Step 1: Preprocessing (Standalone Script)
-
-**User runs preprocessing script:**
-```bash
-python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared
-```
-
-**Script does:**
-- Finds all `*_b.jpg` files
-- Resizes images >3.5MB or >2000px to 1800px @ 85% quality
-- Converts TIFF to JPEG
-- Saves prepared images to output directory
-- Creates mapping file: `preprocessing_mapping.json`
-- Prints statistics (processed, resized, converted, file sizes)
-
-**Benefits:**
-- Verify preprocessing worked before starting Claude session
-- Can reuse prepared images for multiple sessions if needed
-- Faster interactive session (no waiting for resize)
-
-### Step 2: Analysis (Claude Code Interactive Session)
+## Single-Step Interactive Workflow
 
 **User starts Claude Code session and says:**
 ```
-"Analyze the prepared FastFoto images in /tmp/fastfoto_prepared and generate a proposal file"
+"Process my FastFoto images in ~/Photos/FastFoto and generate a proposal file"
 ```
 
-**Claude (you) will:**
-1. Load the `preprocessing_mapping.json` to map prepared → original files
-2. For each prepared image:
-   - Use **Read tool** to analyze with `PHOTO_BACK_OCR_PROMPT`
+**Claude (you) will automatically:**
+1. **Run preprocessing** via Bash tool:
+   - Execute `python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared`
+   - Show preprocessing progress and statistics
+2. **Load mapping** file to understand original → prepared relationships
+3. **Analyze each image** using Read tool:
+   - Use Read tool with `PHOTO_BACK_OCR_PROMPT`
    - Parse response with `parse_claude_response()`
    - Extract metadata (dates, locations, text)
-3. Generate proposal file using `proposal_generator`
-4. Present summary to user
+4. **Generate proposal** file using `proposal_generator`
+5. **Present summary** to user with statistics
 
 **User reviews proposal, then says:**
 ```
@@ -80,10 +61,16 @@ python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepare
 ```
 
 **Claude (you) will:**
-5. Parse the proposal file
-6. Skip entries marked with `SKIP:`
-7. Apply EXIF updates to **original photos** via `exif_writer`
-8. Report results
+6. Parse the proposal file
+7. Skip entries marked with `SKIP:`
+8. Apply EXIF updates to **original photos** via `exif_writer`
+9. Report results
+
+**Benefits:**
+- **Simple UX**: One command does everything
+- **No temp management**: Claude handles preprocessing automatically
+- **Error recovery**: Can fix issues in same session
+- **Seamless workflow**: No context switching
 
 ## Tasks for Phase 2
 
