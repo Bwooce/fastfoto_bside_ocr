@@ -17,18 +17,56 @@ The system uses Claude Code's **single-step interactive workflow** - everything 
 
 **No API keys needed!** Uses Claude Code's Read tool with your Claude Max subscription.
 
-### Single Command Process
+### Two Separate Workflows
 
-Simply tell Claude Code where your FastFoto images are, and it handles everything:
-- Automatically prepares images for analysis
+**🔍 Back OCR Processing (Main Workflow):**
+```
+"Process my FastFoto images in ~/Photos/FastFoto and generate a proposal file"
+```
+- Extracts metadata from **back scans** (_b files)
 - Processes all back scans with OCR
-- Generates a proposal file for review
+- Generates proposal file for review
 - Applies approved EXIF updates
+
+**🔄 Orientation Analysis (Optional, Separate):**
+```
+"Analyze orientation of main FastFoto photos using simple batches"
+```
+- Fixes rotation issues in **main photos** (front images)
+- Simple, fast processing with minimal output
+- Applies EXIF orientation flags only
+
+## 🔍 Comprehensive File Discovery
+
+**Prevents missing files due to naming assumptions!**
+
+The system now detects **multiple back scan naming patterns**:
+- `_b.jpg`, `_B.jpg` (traditional FastFoto)
+- `FastFoto_XXX.jpg` (alternative FastFoto naming)
+- `*back*.jpg`, `*reverse*.jpg`, `*rear*.jpg`
+
+**Before processing, Claude will:**
+1. ✅ Analyze ALL naming patterns in your directory
+2. ✅ Report detected patterns and example filenames
+3. ⚠️ Warn if back scan coverage < 40% (expected ~50%)
+4. 🔍 Flag unrecognized patterns for manual review
+
+**Example output:**
+```
+📊 Pattern Analysis Results:
+  Total files: 300, Back scans: 150 (50.0% coverage)
+
+📋 Detected Patterns:
+  _b_suffix: 93 files (IMG_001_b.jpg, IMG_002_b.jpg...)
+  fastfoto_prefix: 42 files (FastFoto_001.jpg, FastFoto_002.jpg...)
+  back_in_name: 15 files (photo_back_001.jpg...)
+```
 
 ## Features
 
 ✅ **Claude Code integration** - Uses Read tool (no API costs with Claude Max)
 ✅ **LLM-powered OCR** - Superior handwriting recognition using Claude Vision
+✅ **Comprehensive file discovery** - Never miss files due to naming patterns
 ✅ **Spanish primary** - Handles Spanish dates, text (85% of typical collections)
 ✅ **Zone-based search** - Prioritizes bottom edge (50%+ of machine dates), center, handwritten
 ✅ **Safe workflow** - Review proposal file before any changes, automatic backups

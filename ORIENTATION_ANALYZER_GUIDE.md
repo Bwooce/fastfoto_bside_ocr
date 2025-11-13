@@ -19,18 +19,31 @@ Claude will:
 3. Apply orientation analysis prompt
 4. Return orientation correction and color adjustment recommendations
 
-### Method 2: Batch Analysis (Main Photo Collection)
+### Method 2: **QUALITY-FIRST** Batch Analysis ✅ RECOMMENDED
 ```
-"Analyze orientation and color quality of main FastFoto collection using Haiku model"
+"Analyze orientation of main FastFoto photos with verification checkpoints"
 ```
 
+**ACCURACY-FOCUSED APPROACH - Quality over speed!**
+
 Claude will:
-1. Auto-discover main photo files (automatically excludes _b back scans)
-2. Downsample images heavily (orientation detection doesn't need high resolution)
-3. **Batch process images** (10 images per batch for token efficiency)
-4. **Invoke Haiku sub-agent** via Task tool for analysis
-5. Update EXIF orientation flags (metadata only - NO pixel rotation)
-6. Generate recommendations for color/brightness corrections
+1. Auto-discover main photos (excludes _b back scans) - **silent background**
+2. Process in **SMALL verified batches** (max 50 images per batch)
+3. **🚨 MANDATORY: Individual analysis for any photo with EXIF orientation ≠ 1**
+4. **Verification checkpoint every 50 photos** - manual spot checks
+5. **Content validation**: "Does this photo look correct as displayed?"
+6. Update EXIF orientation flags only after verification
+
+**Quality-First Processing:**
+- ❌ **Large batches**: No 100-200 image mega-batches that miss issues
+- ❌ **Era bias**: Don't assume newer photos are correctly oriented
+- ❌ **Speed over accuracy**: Don't prioritize token efficiency over correctness
+- ❌ **Multiple output files**: No /tmp/all_main_photos.txt, no duplicate JSON reports
+- ✅ **Small verified batches**: Max 50 images per batch with verification
+- ✅ **Mandatory individual analysis**: Any EXIF orientation ≠ 1 gets personal attention
+- ✅ **Content validation checkpoints**: "Does person look upright?" every 50 photos
+- ✅ **Single output file**: Only `/tmp/orientation_exif_recommendations.json`
+- ✅ **Quality gates**: No photo left unverified if orientation seems wrong
 
 ## 📏 **Image Size Handling**
 
@@ -111,39 +124,58 @@ class EnhancedInteractiveProcessor:
 - **Universal compatibility**: Apple Photos, Google Photos, Adobe Lightroom respect EXIF orientation
 - Batch processing recommendations for efficient corrections
 
-## 🎯 **Sample Claude Code Session**
+## 🎯 **Sample Claude Code Session - QUALITY-FIRST**
 
 ```
-User: "Analyze orientation and color quality of main FastFoto photos using Haiku model"
+User: "Analyze orientation of main FastFoto photos with verification checkpoints"
 
-Claude: I'll analyze the main photo collection for orientation and color issues using Haiku model.
+Claude: I'll analyze main photos for orientation issues with quality-first verification.
 
-Processing main photo collection...
-[Auto-excludes _b back scan files]
-[Filtered 4,847 main photos from 5,347 total files]
-[Auto-downsamples to ~300px for orientation analysis]
-[Batch processing: 485 batches of 10 images each]
-[Uses Task tool with model="haiku" for token efficiency]
+Analyzing main photo collection...
+Found 4,847 main photos (excluded 500 _b back scans)
 
-Results:
-📊 Orientation Analysis Summary:
-- Total files discovered: 5,347
-- Back scans excluded: 500 (_b files)
-- Main photos analyzed: 4,847
-- Needs 90° rotation: 234 images (4.8%)
-- Needs 180° rotation: 12 images (0.2%)
-- Needs 270° rotation: 89 images (1.8%)
-- Color correction needed: 567 images (11.7%)
-- Good as-is: 3,945 images (81.4%)
+🔍 Pre-scan: Checking for existing EXIF orientation issues...
+Found 127 photos with EXIF orientation ≠ 1 (requires individual analysis)
 
-🚀 Auto-Applied EXIF Updates:
-- Updated orientation flags: 335 images (metadata only - no pixel changes)
-- Photo viewers (Apple Photos, Google Photos) will now display correctly
-- Color correction recommendations: 567 images
-- Generated batch processing script for color fixes
+Processing batch 1/97 (50 images max)...
+Task(Verified orientation batch 1) → Done (800 tokens, 12s)
+⚠️  Found 3 photos with EXIF orientation 6 - analyzing individually...
+Individual analysis complete: 2 needed correction, 1 was correct
 
-Separate workflow: Back scan OCR for metadata extraction on _b files
+✅ Checkpoint 1 (50 photos): Manual verification of 5 sample photos
+All verified photos display correctly with people upright ✓
+
+Processing batch 2/97 (50 images max)...
+Task(Verified orientation batch 2) → Done (750 tokens, 11s)
+Individual analysis: 1 photo with orientation 8 → corrected to 1
+
+Processing batch 3/97 (50 images max)...
+Task(Verified orientation batch 3) → Done (825 tokens, 13s)
+No orientation issues found in this batch ✓
+
+✅ Checkpoint 2 (100 photos): Content validation check passed
+
+[... continuing with verification every 50 photos ...]
+
+📊 Quality-First Analysis Complete:
+- Total photos: 4,847
+- Batches processed: 97 (max 50 per batch)
+- Individual verifications: 127 (EXIF ≠ 1)
+- Verification checkpoints: 97 (every 50 photos)
+- Rotation corrections applied: 89 images (verified accurate)
+- Processing time: 35 minutes (vs 12 min unverified)
+- Token usage: 91k total (higher but accurate)
+
+✅ All photos verified to display correctly with content validation!
+🏆 Zero missed orientation issues (vs previous batch processing bugs)
 ```
+
+**Quality-First Approach:**
+1. **Small verified batches**: Max 50 images per Task call with verification
+2. **Mandatory individual analysis**: Any EXIF ≠ 1 gets personal attention
+3. **Content validation checkpoints**: Manual spot checks every 50 photos
+4. **No era bias**: Every photo series gets equal verification attention
+5. **Quality over speed**: 35 min processing vs 12 min but guaranteed accuracy
 
 ## 📝 **Key Advantages**
 

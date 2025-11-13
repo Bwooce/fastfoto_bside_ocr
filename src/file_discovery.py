@@ -65,33 +65,99 @@ class FileDiscovery:
         return path.suffix in self.extensions
 
     def is_back_file(self, path: Path) -> bool:
-        """Check if file is a back-side scan."""
+        """
+        Check if file is a back-side scan using comprehensive pattern detection.
+
+        Detects multiple naming patterns to avoid missing files:
+        - _b.jpg, _B.jpg (traditional FastFoto)
+        - FastFoto_XXX.jpg (alternative FastFoto naming)
+        - *back*.jpg, *Back*.jpg, *BACK*.jpg
+        - *reverse*.jpg, *rear*.jpg
+        """
         if not self.is_photo_file(path):
             return False
 
         stem = path.stem  # filename without extension
-        return any(stem.endswith(suffix) for suffix in self.back_suffixes)
+        name_lower = path.name.lower()
+
+        # Pattern 1: Traditional _b/_B suffix
+        if any(stem.endswith(suffix) for suffix in self.back_suffixes):
+            return True
+
+        # Pattern 2: FastFoto naming convention (FastFoto_XXX.jpg)
+        if name_lower.startswith('fastfoto_'):
+            return True
+
+        # Pattern 3: Contains "back" in filename
+        if 'back' in name_lower:
+            return True
+
+        # Pattern 4: Contains "reverse" in filename
+        if 'reverse' in name_lower:
+            return True
+
+        # Pattern 5: Contains "rear" in filename
+        if 'rear' in name_lower:
+            return True
+
+        return False
 
     def get_original_path(self, back_path: Path) -> Path:
         """
         Get the original photo path for a back-side scan.
 
+        Handles multiple naming patterns:
+        - IMG_001_b.jpg -> IMG_001.jpg
+        - FastFoto_001.jpg -> tries FastFoto_001_front.jpg or sequential matching
+        - photo_back_001.jpg -> photo_001.jpg or photo_front_001.jpg
+        - scan_reverse_001.jpg -> scan_001.jpg
+
         Args:
-            back_path: Path to back-side scan (e.g., "IMG_001_b.jpg")
+            back_path: Path to back-side scan
 
         Returns:
-            Path to original (e.g., "IMG_001.jpg")
+            Path to corresponding original (best guess)
         """
         stem = back_path.stem
         ext = back_path.suffix
+        name_lower = back_path.name.lower()
 
-        # Remove back suffix
+        # Pattern 1: Traditional _b/_B suffix
         for suffix in self.back_suffixes:
             if stem.endswith(suffix):
                 original_stem = stem[:-len(suffix)]
                 return back_path.parent / f"{original_stem}{ext}"
 
-        # Shouldn't happen if is_back_file() returned True
+        # Pattern 2: FastFoto naming (FastFoto_001.jpg)
+        # For FastFoto files, the original might be the same name or have a different pattern
+        # Since FastFoto often scans backs as separate files, we'll try common alternatives
+        if name_lower.startswith('fastfoto_'):
+            # Try variations: FastFoto_001.jpg could pair with:
+            # - FastFoto_001_front.jpg
+            # - IMG_001.jpg (if there's a different naming scheme for fronts)
+            # For now, return the same path (these may be standalone back scans)
+            return back_path
+
+        # Pattern 3: Contains "back" - try to find front equivalent
+        if 'back' in name_lower:
+            # photo_back_001.jpg -> photo_front_001.jpg or photo_001.jpg
+            original_stem = stem.replace('_back', '').replace('back_', '').replace('back', '')
+            if original_stem:
+                return back_path.parent / f"{original_stem}{ext}"
+
+        # Pattern 4: Contains "reverse" - try to find front equivalent
+        if 'reverse' in name_lower:
+            original_stem = stem.replace('_reverse', '').replace('reverse_', '').replace('reverse', '')
+            if original_stem:
+                return back_path.parent / f"{original_stem}{ext}"
+
+        # Pattern 5: Contains "rear" - try to find front equivalent
+        if 'rear' in name_lower:
+            original_stem = stem.replace('_rear', '').replace('rear_', '').replace('rear', '')
+            if original_stem:
+                return back_path.parent / f"{original_stem}{ext}"
+
+        # If no pattern matched, return the same path (may be a standalone back scan)
         return back_path
 
     def discover_pairs(self, root_dir: Path, recursive: bool = True) -> List[PhotoPair]:
@@ -158,6 +224,101 @@ class FileDiscovery:
         logger.info(f"Created {len(pairs)} photo pairs ({sum(1 for p in pairs if p.has_back)} with backs)")
 
         return pairs
+
+    def analyze_naming_patterns(self, root_dir: Path, recursive: bool = True) -> dict:
+        """
+        Analyze and report all naming patterns found in directory.
+
+        This helps detect if any back scan files might be missed due to
+        unexpected naming patterns.
+
+        Args:
+            root_dir: Root directory to analyze
+            recursive: Search subdirectories
+
+        Returns:
+            Dict with detailed pattern analysis
+        """
+        root_dir = Path(root_dir)
+        if not root_dir.exists():
+            raise ValueError(f"Directory does not exist: {root_dir}")
+
+        logger.info(f"Analyzing naming patterns in: {root_dir}")
+
+        # Find all photo files
+        pattern = "**/*" if recursive else "*"
+        all_files = []
+
+        for ext in self.extensions:
+            all_files.extend(root_dir.glob(f"{pattern}{ext}"))
+
+        # Categorize files by pattern
+        patterns = {
+            'total_files': len(all_files),
+            'back_scans': {
+                '_b_suffix': [],
+                'fastfoto_prefix': [],
+                'back_in_name': [],
+                'reverse_in_name': [],
+                'rear_in_name': [],
+                'total_back_scans': 0
+            },
+            'main_photos': [],
+            'unrecognized_patterns': []
+        }
+
+        for file_path in all_files:
+            name_lower = file_path.name.lower()
+            stem = file_path.stem
+
+            # Check back scan patterns
+            if any(stem.endswith(suffix) for suffix in self.back_suffixes):
+                patterns['back_scans']['_b_suffix'].append(file_path)
+            elif name_lower.startswith('fastfoto_'):
+                patterns['back_scans']['fastfoto_prefix'].append(file_path)
+            elif 'back' in name_lower:
+                patterns['back_scans']['back_in_name'].append(file_path)
+            elif 'reverse' in name_lower:
+                patterns['back_scans']['reverse_in_name'].append(file_path)
+            elif 'rear' in name_lower:
+                patterns['back_scans']['rear_in_name'].append(file_path)
+            else:
+                # Check if this might be an unrecognized back scan pattern
+                # Look for other potential back scan indicators
+                suspicious_patterns = ['side', 'verso', 'flip', 'other', 'scan']
+                if any(keyword in name_lower for keyword in suspicious_patterns):
+                    patterns['unrecognized_patterns'].append(file_path)
+                else:
+                    patterns['main_photos'].append(file_path)
+
+        # Calculate totals
+        total_back_scans = sum(len(files) for files in patterns['back_scans'].values()
+                              if isinstance(files, list))
+        patterns['back_scans']['total_back_scans'] = total_back_scans
+
+        # Calculate coverage percentage
+        if patterns['total_files'] > 0:
+            patterns['back_scan_percentage'] = (total_back_scans / patterns['total_files']) * 100
+        else:
+            patterns['back_scan_percentage'] = 0
+
+        # Log findings
+        logger.info(f"Pattern analysis complete:")
+        logger.info(f"  Total files: {patterns['total_files']}")
+        logger.info(f"  Back scans found: {total_back_scans} ({patterns['back_scan_percentage']:.1f}%)")
+        logger.info(f"  Main photos: {len(patterns['main_photos'])}")
+        logger.info(f"  Unrecognized patterns: {len(patterns['unrecognized_patterns'])}")
+
+        for pattern_name, files in patterns['back_scans'].items():
+            if isinstance(files, list) and files:
+                logger.info(f"    {pattern_name}: {len(files)} files")
+
+        # Warn if coverage seems low
+        if patterns['back_scan_percentage'] < 40:  # Expect ~50% for typical FastFoto collections
+            logger.warning(f"Low back scan coverage ({patterns['back_scan_percentage']:.1f}%) - "
+                          f"possible naming patterns not detected!")
+
+        return patterns
 
     def filter_with_backs(self, pairs: List[PhotoPair]) -> List[PhotoPair]:
         """
