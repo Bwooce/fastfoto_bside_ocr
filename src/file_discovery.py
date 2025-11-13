@@ -69,8 +69,7 @@ class FileDiscovery:
         Check if file is a back-side scan using comprehensive pattern detection.
 
         Detects multiple naming patterns to avoid missing files:
-        - _b.jpg, _B.jpg (traditional FastFoto)
-        - FastFoto_XXX.jpg (alternative FastFoto naming)
+        - _b.jpg, _B.jpg (traditional suffixes, includes FastFoto_XXX_b.jpg)
         - *back*.jpg, *Back*.jpg, *BACK*.jpg
         - *reverse*.jpg, *rear*.jpg
         """
@@ -80,23 +79,19 @@ class FileDiscovery:
         stem = path.stem  # filename without extension
         name_lower = path.name.lower()
 
-        # Pattern 1: Traditional _b/_B suffix
+        # Pattern 1: Traditional _b/_B suffix (includes FastFoto_XXX_b.jpg)
         if any(stem.endswith(suffix) for suffix in self.back_suffixes):
             return True
 
-        # Pattern 2: FastFoto naming convention (FastFoto_XXX.jpg)
-        if name_lower.startswith('fastfoto_'):
-            return True
-
-        # Pattern 3: Contains "back" in filename
+        # Pattern 2: Contains "back" in filename
         if 'back' in name_lower:
             return True
 
-        # Pattern 4: Contains "reverse" in filename
+        # Pattern 3: Contains "reverse" in filename
         if 'reverse' in name_lower:
             return True
 
-        # Pattern 5: Contains "rear" in filename
+        # Pattern 4: Contains "rear" in filename
         if 'rear' in name_lower:
             return True
 
@@ -108,7 +103,7 @@ class FileDiscovery:
 
         Handles multiple naming patterns:
         - IMG_001_b.jpg -> IMG_001.jpg
-        - FastFoto_001.jpg -> tries FastFoto_001_front.jpg or sequential matching
+        - FastFoto_001_b.jpg -> FastFoto_001.jpg
         - photo_back_001.jpg -> photo_001.jpg or photo_front_001.jpg
         - scan_reverse_001.jpg -> scan_001.jpg
 
