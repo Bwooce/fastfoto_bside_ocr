@@ -9,7 +9,9 @@ Generates structured prompts optimized for the analysis results:
 """
 
 # Main OCR extraction prompt template
-PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured metadata for EXIF enrichment.
+PHOTO_BACK_OCR_PROMPT = """🚨 TRANSCRIBE ALL TEXT VERBATIM - NO COMMENTARY OR DESCRIPTIONS 🚨
+
+Analyze this photo back scan and extract structured metadata for EXIF enrichment.
 
 **Context**: Reverse side of scanned photograph (1966-2002 collection).
 
@@ -135,14 +137,20 @@ PHOTO_BACK_OCR_PROMPT = """Analyze this photo back scan and extract structured m
 - Spanish events: "Año Nuevo" = January 1, "Navidad" = December 25
 - Examples: "1-31-85" → "1985-01-31", "26/XI/94" → "1994-11-26", "Año Nuevo 96" → "1996-01-01"
 
-**CRITICAL - raw_ocr_complete Field**:
-- MUST contain VERBATIM transcription of ALL visible text
-- Do NOT describe, summarize, or comment on the text
-- Do NOT say "handwritten text" or "appears to be" - just transcribe it
-- Include ALL text: names, dates, notes, captions, everything
-- Use [illegible] only for truly unreadable characters
-- Example: "Bruce 01/02/98 Fuimos a la playa muy bonita..."
-- NOT: "Bruce written with date plus Spanish diary entries"
+**🚨 CRITICAL - raw_ocr_complete Field 🚨**:
+- TRANSCRIBE EVERY SINGLE CHARACTER you can see
+- NEVER describe what the text is about
+- NEVER use phrases like "handwritten text about", "appears to be", "inverted text about"
+- If you see "Fuimos a la playa muy bonita el domingo" - write exactly that
+- If text is rotated, rotate and transcribe it - don't say "inverted text about vacation"
+- If text is faint, transcribe what you can see - don't say "faint writing"
+- If you cannot read specific words, use [illegible] for those words only
+
+❌ WRONG: "Inverted handwritten Spanish text about Holland vacation experiences"
+✅ CORRECT: "Kodak Advanced Photo System 99/JUN/7 11:33AM ID529-981 <25> 1KN44 Fuimos a Holland fue increible las tulipas eran [illegible] muy bonitas"
+
+❌ WRONG: "Bruce written vertically with date plus Spanish diary entries"
+✅ CORRECT: "Bruce 01/02/98 La playa estaba perfecta hoy nadamos mucho tiempo"
 
 **General**:
 - Report small/faint text even with low confidence
