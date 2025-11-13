@@ -59,78 +59,27 @@ class OrientationAnalyzer:
     def _init_prompt(self):
         """Initialize the analysis prompt for Haiku model."""
         self.batch_analysis_prompt = '''
-Analyze these photos for orientation and quality issues.
-
-Return JSON array with one entry per image:
+Analyze photo orientation and technical quality. Return JSON array:
 
 ```json
 [
   {
     "image_name": "IMG_001.jpg",
-    "orientation": {
-      "needs_rotation": true/false,
-      "rotation_degrees": 0,
-      "confidence": 0.95,
-      "reasoning": "Text appears upside down"
-    },
-    "quality": {
-      "overall_score": 0.85,
-      "blur_detected": false,
-      "lighting_issues": false,
-      "contrast_problems": false,
-      "quality_notes": "Sharp and well-lit"
-    },
-    "content": {
-      "has_text": true,
-      "has_handwriting": true,
-      "is_back_scan": false,
-      "multiple_photos": false,
-      "content_notes": "Clear main photo"
-    },
-    "recommendations": {
-      "skip_ocr": false,
-      "high_value": true,
-      "manual_review": false,
-      "processing_notes": "Good orientation, suitable for display"
-    }
+    "needs_rotation": true/false,
+    "rotation_degrees": 0,
+    "quality_score": 0.85,
+    "blur_detected": false,
+    "lighting_issues": false
   }
 ]
 ```
 
-**🚨 CRITICAL: TECHNICAL ANALYSIS ONLY - NO IMAGE CONTENT DESCRIPTION 🚨**
-
-**Analysis Guidelines:**
-
-**Orientation Detection:**
-- Detect rotation angles: 0°, 90°, 180°, 270°
-- Base on text orientation, horizon lines, standard photo alignment
-- Provide confidence score for rotation recommendation
-- NO description of what text says or what's in the image
-
-**Quality Assessment:**
-- overall_score: 0.0 (unusable) to 1.0 (perfect) - technical quality only
-- blur_detected: Focus issues, motion blur (yes/no)
-- lighting_issues: Exposure problems (yes/no)
-- contrast_problems: Technical contrast issues (yes/no)
-
-**Technical Content Detection:**
-- has_text: Text elements present (yes/no) - don't describe what text
-- has_handwriting: Handwritten elements present (yes/no) - don't describe content
-- is_back_scan: false (this is for main photos)
-- multiple_photos: Multiple photos in scan (yes/no)
-
-**Processing Recommendations:**
-- skip_ocr: Not applicable for main photos
-- high_value: Good technical quality for display (yes/no)
-- manual_review: Uncertain technical quality (yes/no)
-
-**FORBIDDEN:**
-- Describing people, places, events in photos
-- Reading or interpreting text content
-- Commenting on photo subject matter
-- Any content-based analysis
-
-**FOCUS:** Pure technical orientation and quality metrics for display optimization
+Rules:
+- Detect rotation: 0°, 90°, 180°, 270° only
+- Quality score: 0.0-1.0 (technical quality)
+- NO content description
+- NO text interpretation
+- Focus: display optimization only
 '''
 
     def analyze_image(self, image_path: Path) -> OrientationResult:
@@ -428,18 +377,20 @@ Return JSON array with one entry per image:
             if 'rotated' in name_lower:
                 result = {
                     "image_name": image_path.name,
-                    "orientation": {"needs_rotation": True, "rotation_degrees": 90, "confidence": 0.92},
-                    "quality": {"overall_score": 0.85, "blur_detected": False, "lighting_issues": False},
-                    "content": {"has_text": True, "has_handwriting": False, "is_back_scan": False},
-                    "recommendations": {"skip_ocr": False, "high_value": True, "manual_review": False}
+                    "needs_rotation": True,
+                    "rotation_degrees": 90,
+                    "quality_score": 0.85,
+                    "blur_detected": False,
+                    "lighting_issues": False
                 }
             else:
                 result = {
                     "image_name": image_path.name,
-                    "orientation": {"needs_rotation": False, "rotation_degrees": 0, "confidence": 0.98},
-                    "quality": {"overall_score": 0.88, "blur_detected": False, "lighting_issues": False},
-                    "content": {"has_text": True, "has_handwriting": True, "is_back_scan": False},
-                    "recommendations": {"skip_ocr": False, "high_value": True, "manual_review": False}
+                    "needs_rotation": False,
+                    "rotation_degrees": 0,
+                    "quality_score": 0.88,
+                    "blur_detected": False,
+                    "lighting_issues": False
                 }
             results.append(result)
 
@@ -468,26 +419,21 @@ Return JSON array with one entry per image:
                 if image_name in path_lookup:
                     image_path = path_lookup[image_name]
 
-                    orientation = item.get('orientation', {})
-                    quality = item.get('quality', {})
-                    content = item.get('content', {})
-                    recommendations = item.get('recommendations', {})
-
                     result = OrientationResult(
-                        needs_rotation=orientation.get('needs_rotation', False),
-                        rotation_degrees=orientation.get('rotation_degrees', 0),
-                        confidence=orientation.get('confidence', 0.0),
-                        quality_score=quality.get('overall_score', 0.5),
-                        blur_detected=quality.get('blur_detected', False),
-                        lighting_issues=quality.get('lighting_issues', False),
-                        contrast_problems=quality.get('contrast_problems', False),
-                        has_text=content.get('has_text', True),
-                        has_handwriting=content.get('has_handwriting', False),
-                        is_back_scan=content.get('is_back_scan', False),
-                        multiple_photos=content.get('multiple_photos', False),
-                        skip_ocr=recommendations.get('skip_ocr', False),
-                        high_value=recommendations.get('high_value', False),
-                        manual_review=recommendations.get('manual_review', False),
+                        needs_rotation=item.get('needs_rotation', False),
+                        rotation_degrees=item.get('rotation_degrees', 0),
+                        confidence=0.9,  # Default high confidence for simplified analysis
+                        quality_score=item.get('quality_score', 0.5),
+                        blur_detected=item.get('blur_detected', False),
+                        lighting_issues=item.get('lighting_issues', False),
+                        contrast_problems=False,  # Not analyzed in simplified version
+                        has_text=True,  # Default assumption for main photos
+                        has_handwriting=False,  # Not analyzed in simplified version
+                        is_back_scan=False,  # This is for main photos
+                        multiple_photos=False,  # Not analyzed in simplified version
+                        skip_ocr=False,  # Not applicable for main photos
+                        high_value=item.get('quality_score', 0.5) > 0.7,  # Based on quality score
+                        manual_review=item.get('quality_score', 0.5) < 0.3,  # Low quality needs review
                         raw_response=response
                     )
                     results.append((image_path, result))
