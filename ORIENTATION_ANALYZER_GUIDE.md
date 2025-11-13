@@ -25,7 +25,7 @@ Claude will:
 ```
 
 Claude will:
-1. Discover all main photo files (not _b back scans)
+1. Auto-discover main photo files (automatically excludes _b back scans)
 2. Downsample images heavily (orientation detection doesn't need high resolution)
 3. Analyze each with Haiku model
 4. Update EXIF orientation flags (metadata only - NO pixel rotation)
@@ -117,14 +117,18 @@ User: "Analyze orientation and color quality of main FastFoto photos using Haiku
 
 Claude: I'll analyze the main photo collection for orientation and color issues using Haiku model.
 
-Processing main photos (not back scans)...
+Processing main photo collection...
+[Auto-excludes _b back scan files]
+[Filtered 4,847 main photos from 5,347 total files]
 [Auto-downsamples to ~600px for orientation analysis]
 [Uses Task tool with model="haiku"]
 [Processes main photo collection in batches]
 
 Results:
 📊 Orientation Analysis Summary:
-- Total main photos: 4,847
+- Total files discovered: 5,347
+- Back scans excluded: 500 (_b files)
+- Main photos analyzed: 4,847
 - Needs 90° rotation: 234 images (4.8%)
 - Needs 180° rotation: 12 images (0.2%)
 - Needs 270° rotation: 89 images (1.8%)
