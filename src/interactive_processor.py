@@ -383,15 +383,168 @@ class InteractiveProcessor:
 
         Args:
             proposal_path: Path to proposal file
-            dry_run: If True, don't actually write EXIF
+            dry_run: If True, don't actually write EXIF or move files
 
         Returns:
             Number of images updated
         """
-        # TODO: Implement proposal parsing and application
-        # This requires parsing the proposal file format and applying updates
-        logger.warning("apply_proposal() not yet implemented")
-        return 0
+        if not proposal_path.exists():
+            logger.error(f"Proposal file not found: {proposal_path}")
+            return 0
+
+        logger.info(f"Applying proposal from: {proposal_path}")
+
+        updated_count = 0
+        organized_count = 0
+        skipped_count = 0
+        error_count = 0
+
+        try:
+            # Read and parse proposal file
+            with open(proposal_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Parse entries from proposal file
+            entries = self._parse_proposal_content(content)
+
+            logger.info(f"Found {len(entries)} entries in proposal")
+
+            for entry in entries:
+                if entry.get('skip', False):
+                    logger.info(f"Skipping {entry['original_path']} (marked as SKIP)")
+                    skipped_count += 1
+                    continue
+
+                if not entry.get('proposed_updates'):
+                    logger.info(f"No updates for {entry['original_path']}")
+                    skipped_count += 1
+                    continue
+
+                original_path = Path(entry['original_path'])
+                back_path = Path(entry['back_path']) if entry.get('back_path') else None
+                proposed_updates = entry['proposed_updates']
+
+                try:
+                    # Apply EXIF updates
+                    if not dry_run:
+                        success = self.exif_writer.write_exif(
+                            original_path,
+                            proposed_updates,
+                            overwrite_original=True  # No backup files
+                        )
+
+                        if success:
+                            updated_count += 1
+                            logger.info(f"Updated EXIF for {original_path.name}")
+
+                            # Move back scan to processed/ directory
+                            if back_path and back_path.exists():
+                                organized = self.exif_writer.organize_processed_back_scan(back_path)
+                                if organized:
+                                    organized_count += 1
+                        else:
+                            logger.error(f"Failed to update EXIF for {original_path.name}")
+                            error_count += 1
+                    else:
+                        # Dry run - just log what would be done
+                        logger.info(f"[DRY RUN] Would update {original_path.name} with {len(proposed_updates)} fields")
+                        if back_path and back_path.exists():
+                            logger.info(f"[DRY RUN] Would move {back_path.name} to processed/")
+                        updated_count += 1
+
+                except Exception as e:
+                    logger.error(f"Error processing {original_path}: {e}")
+                    error_count += 1
+
+        except Exception as e:
+            logger.error(f"Error reading proposal file: {e}")
+            return 0
+
+        # Print results
+        print(f"\n{'='*80}")
+        print(f"APPLY PROPOSAL RESULTS")
+        print(f"{'='*80}")
+        print(f"✅ Photos updated:        {updated_count}")
+        print(f"📁 Back scans organized:  {organized_count}")
+        print(f"⏭️  Entries skipped:       {skipped_count}")
+        print(f"❌ Errors:               {error_count}")
+        print(f"{'='*80}\n")
+
+        if not dry_run and organized_count > 0:
+            print(f"✨ Processed back scans moved to 'processed/' subdirectories")
+            print(f"💡 Tip: To reprocess, move files back from processed/ directories\n")
+
+        return updated_count
+
+    def _parse_proposal_content(self, content: str) -> List[Dict]:
+        """
+        Parse proposal file content into structured entries.
+
+        Args:
+            content: Raw proposal file content
+
+        Returns:
+            List of proposal entries
+        """
+        entries = []
+        current_entry = None
+
+        for line in content.split('\n'):
+            line = line.strip()
+
+            # Skip empty lines and headers
+            if not line or line.startswith('=') or line.startswith('SUMMARY:') or line.startswith('INSTRUCTIONS:'):
+                continue
+
+            # Check for SKIP marker
+            if line.startswith('SKIP:'):
+                if current_entry:
+                    current_entry['skip'] = True
+                continue
+
+            # New entry
+            if line.startswith('[') and '] ' in line:
+                if current_entry:
+                    entries.append(current_entry)
+
+                # Extract original path from entry header
+                parts = line.split('] ', 1)
+                if len(parts) > 1:
+                    original_path = parts[1].strip()
+                    current_entry = {
+                        'original_path': original_path,
+                        'skip': False,
+                        'proposed_updates': {},
+                        'back_path': None
+                    }
+                continue
+
+            if current_entry is None:
+                continue
+
+            # Extract back scan path
+            if line.startswith('Back scan:'):
+                current_entry['back_path'] = line.split(':', 1)[1].strip()
+                continue
+
+            # Parse EXIF field updates
+            if ':' in line and not line.startswith('  ') and 'EXIF' not in line and 'METADATA' not in line:
+                field, value = line.split(':', 1)
+                field = field.strip()
+                value = value.strip()
+
+                # Skip descriptive fields
+                if field in ['Confidence', 'Source', 'Language', 'Note', 'Zones with data']:
+                    continue
+
+                if value and value != '<not set>':
+                    current_entry['proposed_updates'][field] = value
+
+        # Add last entry
+        if current_entry:
+            entries.append(current_entry)
+
+        return entries
 
     def print_statistics(self):
         """Print processing statistics."""

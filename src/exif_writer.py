@@ -84,15 +84,15 @@ class ExifWriter:
             return {}
 
     def write_exif(self, image_path: Path, metadata: Dict[str, Any],
-                    backup: bool = True, overwrite_original: bool = False) -> bool:
+                    backup: bool = False, overwrite_original: bool = True) -> bool:
         """
         Write EXIF metadata to image.
 
         Args:
             image_path: Path to image file
             metadata: Dict of EXIF field names and values
-            backup: Create backup file before writing
-            overwrite_original: Overwrite original file (no _original backup)
+            backup: Create backup file before writing (default: False)
+            overwrite_original: Overwrite original file (default: True, no _original backup)
 
         Returns:
             True if successful, False otherwise
@@ -364,6 +364,46 @@ class ExifWriter:
         )
 
         return self.write_exif(image_path, metadata, overwrite_original=overwrite_original)
+
+    def organize_processed_back_scan(self, back_scan_path: Path,
+                                    source_directory: Optional[Path] = None) -> bool:
+        """
+        Move successfully processed back scan to processed/ subdirectory.
+
+        Args:
+            back_scan_path: Path to the back scan file (*_b.jpg)
+            source_directory: Source directory to create processed/ in (default: parent of back_scan_path)
+
+        Returns:
+            True if moved successfully, False otherwise
+        """
+        if not back_scan_path.exists():
+            logger.error(f"Back scan file not found: {back_scan_path}")
+            return False
+
+        # Determine source directory
+        if source_directory is None:
+            source_directory = back_scan_path.parent
+
+        # Create processed subdirectory if it doesn't exist
+        processed_dir = source_directory / "processed"
+        try:
+            processed_dir.mkdir(exist_ok=True)
+        except Exception as e:
+            logger.error(f"Could not create processed directory: {e}")
+            return False
+
+        # Move file to processed directory
+        new_path = processed_dir / back_scan_path.name
+
+        try:
+            import shutil
+            shutil.move(str(back_scan_path), str(new_path))
+            logger.info(f"Moved processed back scan: {back_scan_path.name} → processed/")
+            return True
+        except Exception as e:
+            logger.error(f"Could not move {back_scan_path.name} to processed/: {e}")
+            return False
 
 
 if __name__ == "__main__":
