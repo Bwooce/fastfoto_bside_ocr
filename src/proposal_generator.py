@@ -65,11 +65,25 @@ class ProposalGenerator:
 
     def add_entry(self, entry: ProposalEntry):
         """
-        Add a proposal entry.
+        Add a proposal entry with validation.
 
         Args:
             entry: ProposalEntry object
         """
+        # Validate filename doesn't contain incorrect patterns
+        original_name = entry.original_path.name if entry.original_path else ""
+
+        # Catch common filename bugs - ANY back scan suffix
+        if (original_name.endswith('_a.jpg') or original_name.endswith('_a.jpeg') or
+            original_name.endswith('_b.jpg') or original_name.endswith('_b.jpeg')):
+            raise ValueError(
+                f"BUG DETECTED: Proposal references back scan filename '{original_name}' "
+                f"instead of front image. Remove back scan suffix (_a/_b) for front image filename."
+            )
+
+        # Log entry for debugging
+        logger.debug(f"Adding proposal entry: {original_name}")
+
         self.entries.append(entry)
 
     def generate_header(self) -> str:
