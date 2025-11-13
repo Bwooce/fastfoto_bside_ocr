@@ -1,38 +1,30 @@
-# Orientation Analyzer Usage Guide
+# Orientation Analyzer - SIMPLE USAGE
 
-## 🎯 **Purpose**: Analyze MAIN PHOTOS (front images), NOT back scans
+## ⚠️ **JUST RUN THE EXISTING TOOL - NO EXPLORATION NEEDED**
 
-**Two Separate Workflows:**
-1. **Orientation Analyzer** → Main photo collection (~5000 images) → Orientation, color correction
-2. **OCR Analysis** → Back scans (_b files, ~500 images) → Metadata extraction
+When a user says: **"Analyze orientation of main FastFoto photos with verification checkpoints"**
 
-## ⚠️ **CRITICAL: DO NOT WRITE NEW CODE OR SCRIPTS**
-
-**The orientation analyzer already exists and works perfectly!**
-
-- ✅ **Use existing tools**: `src/orientation_analyzer.py`
-- ✅ **Follow simple instructions below**
-- ❌ **DO NOT write new scripts or code**
-- ❌ **DO NOT create run_orientation_check.py or similar**
-- ❌ **DO NOT implement EnhancedInteractiveProcessor**
-
-## 🚀 How to Invoke in Claude Code Sessions
-
-### Method 1: Direct Analysis (Single Main Photo)
-```
-"Analyze the orientation and quality of this main photo using Haiku model: /tmp/photos_prepared/IMG_001.jpg"
+**DO THIS IMMEDIATELY:**
+```bash
+python src/orientation_analyzer.py /path/to/photos
 ```
 
-Claude will:
-1. Use Task tool with `model="haiku"`
-2. Use Read tool on the downsampled image
-3. Apply orientation analysis prompt
-4. Return orientation correction and color adjustment recommendations
+## ❌ **DO NOT DO ANY OF THIS:**
+- ❌ Create project overview documents
+- ❌ Use Explore tool to understand codebase
+- ❌ Write new scripts or code
+- ❌ Set up todo lists for exploration
+- ❌ Create comprehensive documentation
 
-### Method 2: **QUALITY-FIRST** Batch Analysis ✅ RECOMMENDED
+## ✅ **JUST RUN THE TOOL DIRECTLY:**
+
+**For the directory ~/Pictures/2025_PeruScanning, run:**
+
+```bash
+python src/orientation_analyzer.py ~/Pictures/2025_PeruScanning
 ```
-"Analyze orientation of main FastFoto photos with verification checkpoints"
-```
+
+**That's it! The tool handles everything automatically:**
 
 **ACCURACY-FOCUSED APPROACH - Quality over speed!**
 

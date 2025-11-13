@@ -30,10 +30,10 @@ The system uses Claude Code's **single-step interactive workflow** - everything 
 
 **🔄 Orientation Analysis (Optional, Separate):**
 ```
-"Analyze orientation of main FastFoto photos using simple batches"
+"Analyze orientation of main FastFoto photos with verification checkpoints"
 ```
 - Fixes rotation issues in **main photos** (front images)
-- Simple, fast processing with minimal output
+- Quality-first processing with verification every 50 photos
 - Applies EXIF orientation flags only
 
 ## 🔍 Comprehensive File Discovery

@@ -40,3 +40,20 @@
 2. **Orientation Analysis** - Batch processing for main photo quality/rotation (5000+ main files)
 
 These are **separate workflows** with different processing patterns and requirements.
+
+## ⚠️ **CRITICAL: Orientation Analysis Instructions**
+
+When user requests: **"Analyze orientation of main FastFoto photos with verification checkpoints"**
+
+**DO THIS IMMEDIATELY - NO EXPLORATION:**
+```bash
+python src/orientation_analyzer.py /path/to/photos
+```
+
+**DO NOT:**
+- ❌ Create project overview documents
+- ❌ Use Explore tool to understand codebase
+- ❌ Write new scripts or code
+- ❌ Set up todo lists for exploration
+
+**The tool already exists and works! See ORIENTATION_ANALYZER_GUIDE.md for details.**
