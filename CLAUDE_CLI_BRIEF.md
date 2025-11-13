@@ -36,22 +36,41 @@ pip install -r requirements.txt
 # Linux: apt-get install libimage-exiftool-perl
 ```
 
-## New Workflow: Interactive Processing
+## New Workflow: Two-Step Process
 
-### How It Works
+### Step 1: Preprocessing (Standalone Script)
+
+**User runs preprocessing script:**
+```bash
+python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared
+```
+
+**Script does:**
+- Finds all `*_b.jpg` files
+- Resizes images >3.5MB or >2000px to 1800px @ 85% quality
+- Converts TIFF to JPEG
+- Saves prepared images to output directory
+- Creates mapping file: `preprocessing_mapping.json`
+- Prints statistics (processed, resized, converted, file sizes)
+
+**Benefits:**
+- Verify preprocessing worked before starting Claude session
+- Can reuse prepared images for multiple sessions if needed
+- Faster interactive session (no waiting for resize)
+
+### Step 2: Analysis (Claude Code Interactive Session)
 
 **User starts Claude Code session and says:**
 ```
-"Process my FastFoto back scans in ~/Photos/FastFoto and generate a proposal file"
+"Analyze the prepared FastFoto images in /tmp/fastfoto_prepared and generate a proposal file"
 ```
 
 **Claude (you) will:**
-1. Call `file_discovery.discover_pairs()` to find all `*_b.jpg` files
-2. For each back scan:
-   - Call `image_processor.prepare_for_ocr()` if needed
-   - Use **Read tool** to analyze the image with `PHOTO_BACK_OCR_PROMPT`
+1. Load the `preprocessing_mapping.json` to map prepared → original files
+2. For each prepared image:
+   - Use **Read tool** to analyze with `PHOTO_BACK_OCR_PROMPT`
    - Parse response with `parse_claude_response()`
-   - Extract metadata with date parser, location extraction, etc.
+   - Extract metadata (dates, locations, text)
 3. Generate proposal file using `proposal_generator`
 4. Present summary to user
 
@@ -63,33 +82,28 @@ pip install -r requirements.txt
 **Claude (you) will:**
 5. Parse the proposal file
 6. Skip entries marked with `SKIP:`
-7. Apply EXIF updates via `exif_writer`
+7. Apply EXIF updates to **original photos** via `exif_writer`
 8. Report results
 
 ## Tasks for Phase 2
 
-### TASK 1: Refactor orchestrator.py for Interactive Mode
+### ✅ TASK 1: Preprocessing Script (COMPLETE)
 
-**Current state:** `orchestrator.py` expects to call Anthropic SDK
+**File:** `src/preprocess_images.py`
 
-**New design:**
-- Keep helper functions (extract_metadata_from_analysis, etc.)
-- Remove or stub out `analyze_back_scan()` - Claude will call Read tool directly
-- Keep `create_proposal()` but modify to accept pre-analyzed data
-- Keep `apply_proposal()` - this still works as-is
-
-**Or simpler:** Don't use orchestrator.py at all! Just call the modules directly:
-```python
-from src.file_discovery import FileDiscovery
-from src.proposal_generator import ProposalGenerator
-# etc.
-```
+**Done:**
+- Standalone CLI script for preprocessing images
+- Uses existing `file_discovery` and `image_processor` modules
+- Progress bars with tqdm
+- Statistics reporting
+- Creates mapping file for original → prepared paths
+- Preserves directory structure (optional)
 
 ### TASK 2: Create Interactive Processing Helper
 
 **New file:** `src/interactive_processor.py`
 
-**Purpose:** Helper functions for Claude Code sessions
+**Purpose:** Helper functions for Claude Code sessions to analyze prepared images
 
 ```python
 class InteractiveProcessor:
@@ -160,51 +174,98 @@ Update `README.md` to explain:
 - Example session dialogue
 - Cost: $0 (uses Claude Max)
 
-## Example Interactive Session
+## Example Complete Workflow
+
+### Step 1: User runs preprocessing (command line)
+
+```bash
+$ python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared
+
+================================================================================
+FastFoto Back Scan Preprocessor
+================================================================================
+Source:      /Users/you/Photos/FastFoto
+Output:      /tmp/fastfoto_prepared
+Recursive:   True
+Structure:   Preserved
+================================================================================
+
+Discovering photos in /Users/you/Photos/FastFoto (recursive=True)...
+Found 482 back scans to preprocess
+
+Processing: 100%|██████████████████████████| 482/482 [00:45<00:00, 10.67it/s]
+
+Mapping saved to: /tmp/fastfoto_prepared/preprocessing_mapping.json
+
+================================================================================
+PREPROCESSING SUMMARY
+================================================================================
+Total back scans found:      482
+Resized (too large):         127
+Converted (TIFF→JPEG):       5
+Copied as-is:                350
+Errors:                      0
+
+Total size before:           2847.3 MB
+Total size after:            892.5 MB
+Size reduction:              68.7%
+================================================================================
+
+✓ Preprocessing complete! Next steps:
+  1. Review prepared images in: /tmp/fastfoto_prepared
+  2. Start Claude Code session and say:
+     "Analyze the prepared FastFoto images in /tmp/fastfoto_prepared"
+```
+
+### Step 2: User starts Claude Code session
 
 ```
-User: "Process my FastFoto photos in ~/Photos/FastFoto"
+User: "Analyze the prepared FastFoto images in /tmp/fastfoto_prepared and generate a proposal file"
 
-Claude (you): I'll process your FastFoto back scans. Let me discover the files first...
+Claude (you): I'll analyze the prepared FastFoto back scans. Let me load the mapping file first...
 
-[Call file_discovery and image_processor]
+[Load preprocessing_mapping.json to get original file paths]
 
-Found 482 photo pairs with back scans. I'll now analyze each back scan using the Read tool. This will take a few minutes...
+Found 482 prepared images. I'll analyze each using the Read tool with the OCR prompt. This will take a while...
 
-[For each back scan:]
-  - Use Read tool with the prepared image
-  - Send PHOTO_BACK_OCR_PROMPT
-  - Parse response
-  - Extract metadata
+[For each prepared image:]
+  - Use Read tool with PHOTO_BACK_OCR_PROMPT
+  - Parse response with parse_claude_response()
+  - Extract metadata (dates, locations, text)
+  - Track statistics
 
 Processing: [1/482] IMG_001_b.jpg... ✓ (date: 1999-06-07, location: Utrecht)
 Processing: [2/482] IMG_002_b.jpg... ✓ (date: 2001-03-15)
+Processing: [3/482] IMG_003_b.jpg... ⚠ (confidence: 0.58, no useful data)
 ...
 
 Analysis complete!
 - 482 photos analyzed
 - 289 with useful metadata (60%)
+- 193 without useful data (40%)
 - Average confidence: 0.88
 
 Generating proposal file...
 
 ✓ Proposal created: exif_updates_proposal.txt
 
-Please review the file. When ready, say "apply the proposal" to update your photos.
+Please review the file and make any edits. When ready, say "apply the proposal" to update your photos.
 
 ---
 
 User: "apply the proposal"
 
-Claude: Applying EXIF updates from proposal file...
+Claude: Applying EXIF updates from proposal file to original photos...
 
-[Parse proposal, skip SKIP: entries, apply via exif_writer]
+[Parse proposal, skip SKIP: entries, apply to original files via exif_writer]
+
+Processing updates: 100%|████████████████| 289/289 [00:12<00:00, 23.47it/s]
 
 ✓ Updated 289 photos
 ✓ Skipped 2 (marked with SKIP:)
 ✓ Backups created (*_original files)
 
-Done! Your photos now have updated EXIF metadata from the back scans.
+Done! Your original photos now have updated EXIF metadata from the back scans.
 ```
 
 ## Testing Strategy
@@ -214,12 +275,16 @@ Done! Your photos now have updated EXIF metadata from the back scans.
 3. **Test apply:** Use --dry-run first
 4. **Full run:** Process entire collection
 
-## Files You'll Modify
+## Files Status
 
+**✅ Complete:**
+- `src/preprocess_images.py` (NEW) - Standalone preprocessing script
+- `requirements.txt` (UPDATED) - Removed anthropic package
+
+**🚧 To Implement:**
 - `src/interactive_processor.py` (NEW) - Helper for Claude Code sessions
-- `src/orchestrator.py` (MODIFY) - Keep apply_proposal(), update/remove analyze_back_scan()
-- `README.md` (UPDATE) - Document interactive workflow
-- `requirements.txt` (DONE) - Already removed anthropic package
+- `README.md` (UPDATE) - Document two-step workflow
+- `orchestrator.py` (OPTIONAL) - May not need it with interactive approach
 
 ## Your Role
 
