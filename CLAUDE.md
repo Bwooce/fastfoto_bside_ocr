@@ -46,9 +46,7 @@ These are **separate workflows** with different processing patterns and requirem
 When user requests: **"Analyze orientation of main FastFoto photos with verification checkpoints"**
 
 **DO THIS IMMEDIATELY - NO EXPLORATION:**
-```bash
-python src/orientation_analyzer.py /path/to/photos
-```
+Use Task tool with subagent_type="general-purpose", model="haiku" to run batch orientation analysis. The analysis must verify: "Do people look upright? Does the scene make visual sense when displayed?"
 
 **DO NOT:**
 - ❌ Create project overview documents
