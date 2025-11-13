@@ -102,7 +102,7 @@ def preprocess_images(
     print(f"Discovering photos in {source_dir} (recursive={recursive})...")
     pairs = discovery.discover_pairs(source_dir, recursive)
 
-    back_scans = [pair for pair in pairs if pair.has_back_scan]
+    back_scans = [pair for pair in pairs if pair.has_back]
     stats.total_files = len(back_scans)
 
     if stats.total_files == 0:
@@ -116,7 +116,7 @@ def preprocess_images(
 
     for pair in iterator:
         try:
-            back_scan = pair.back_scan
+            back_scan = pair.back
 
             # Calculate relative path for output
             if preserve_structure:
@@ -133,7 +133,7 @@ def preprocess_images(
             stats.total_size_before += original_size
 
             # Check if preprocessing needed
-            needs_processing = processor._needs_processing(back_scan)
+            needs_processing = processor.needs_resize(back_scan)
 
             if needs_processing:
                 # Preprocess (resize/convert)
@@ -171,10 +171,10 @@ def preprocess_images(
                 print(f"✓ {back_scan.name}")
 
         except Exception as e:
-            logger.error(f"Error processing {pair.back_scan}: {e}")
+            logger.error(f"Error processing {pair.back}: {e}")
             stats.errors += 1
             if not HAS_TQDM:
-                print(f"✗ {back_scan.name}: {e}")
+                print(f"✗ {pair.back.name}: {e}")
             continue
 
     return mapping, stats
