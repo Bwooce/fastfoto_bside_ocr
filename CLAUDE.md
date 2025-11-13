@@ -45,8 +45,13 @@ These are **separate workflows** with different processing patterns and requirem
 
 When user requests: **"Analyze orientation of main FastFoto photos with verification checkpoints"**
 
-**DO THIS IMMEDIATELY - NO EXPLORATION:**
-Use Task tool with subagent_type="general-purpose", model="haiku" to run batch orientation analysis. The analysis must verify: "Do people look upright? Does the scene make visual sense when displayed?"
+**DO THIS IMMEDIATELY - USE TASK TOOL FOR BATCH PROCESSING:**
+Use Task tool with:
+- subagent_type="general-purpose"
+- model="haiku"
+- Include downsampling to 300px for Read tool compatibility
+- Verify: "Do people look upright? Does the scene make visual sense when displayed?"
+- Process in batches of 50 max with verification checkpoints
 
 **DO NOT:**
 - ❌ Create project overview documents

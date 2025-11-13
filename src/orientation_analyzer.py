@@ -59,14 +59,24 @@ class OrientationAnalyzer:
     def _init_prompt(self):
         """Initialize the analysis prompt for Haiku model."""
         self.batch_analysis_prompt = '''
-Analyze photo orientation and technical quality. Return JSON array:
+Analyze photo VISUAL orientation and quality by looking at the actual image content.
+
+CRITICAL: Check if people, text, or objects appear upside down, sideways, or incorrectly rotated.
+- Look at faces, bodies, standing people
+- Check if text/writing is readable in normal orientation
+- Verify horizon lines, buildings, cars are upright
+- Identify if image needs 90°, 180°, or 270° rotation to appear correct
+
+Return JSON array:
 
 ```json
 [
   {
     "image_name": "IMG_001.jpg",
-    "needs_rotation": true/false,
-    "rotation_degrees": 0,
+    "needs_rotation": true,
+    "rotation_degrees": 90,
+    "current_orientation": "person appears sideways",
+    "visual_check": "people should be upright",
     "quality_score": 0.85,
     "blur_detected": false,
     "lighting_issues": false
@@ -387,17 +397,26 @@ CRITICAL: Return a JSON array with exactly {len(image_paths)} entries, one for e
         # Use Task tool with Haiku model for efficient batch processing
         logger.info(f"Calling Task tool for batch analysis of {len(image_paths)} images...")
 
-        # Simulate the Task call for now (this would be replaced with actual Task tool call)
-        # In actual implementation, this would use:
-        # task_response = Task(
-        #     subagent_type="general-purpose",
-        #     model="haiku",
-        #     prompt=batch_prompt + "\n\nProcess all downsampled images and return orientation analysis JSON.",
-        #     description="Batch orientation analysis"
-        # )
+        try:
+            # Use Task tool to analyze all downsampled images
+            from claude_code_tools import Task  # Import Task tool
 
-        # For now, simulate batch processing
-        return self._simulate_batch_analysis(image_paths)
+            task_response = Task(
+                subagent_type="general-purpose",
+                model="haiku",
+                prompt=batch_prompt + f"\n\nAnalyze all {len(image_paths)} downsampled images using Read tool and return orientation analysis JSON with visual verification.",
+                description=f"Visual orientation analysis of {len(image_paths)} photos"
+            )
+
+            return task_response
+
+        except ImportError:
+            # Fallback if Task tool not available in this context
+            logger.warning("Task tool not available, using simulation")
+            return self._simulate_batch_analysis(image_paths)
+        except Exception as e:
+            logger.error(f"Task tool failed: {e}, using simulation")
+            return self._simulate_batch_analysis(image_paths)
 
     def _downsample_image_for_orientation(self, image_path: Path) -> Path:
         """

@@ -29,6 +29,24 @@ Use Task tool with:
 
 **The analysis must verify:** "Do people look upright? Does the scene make visual sense?"
 
+## 🔧 **CRITICAL: Technical Requirements**
+
+**Image Size Handling:**
+- ✅ **Automatic downsampling**: Images downsampled to 300px max dimension
+- ✅ **Prevents Read tool failures**: Large images (10MB+) will break Read tool
+- ✅ **Quality maintained**: LANCZOS resampling preserves orientation details
+
+**Visual Analysis Requirements:**
+- ✅ **Content-based checking**: Look at people, faces, text, buildings
+- ✅ **Rotation detection**: Identify 90°, 180°, 270° corrections needed
+- ✅ **Verification checkpoints**: Manual spot-checks every 50 photos
+- ✅ **Quality over speed**: Better to take time and catch all issues
+
+**Output Requirements:**
+- ✅ **EXIF recommendations**: `/tmp/orientation_exif_recommendations.json`
+- ✅ **Specific rotations**: Exact degree corrections for each problem image
+- ✅ **Visual context**: "Person appears sideways, needs 90° clockwise rotation"
+
 **ACCURACY-FOCUSED APPROACH - Quality over speed!**
 
 Claude will:
