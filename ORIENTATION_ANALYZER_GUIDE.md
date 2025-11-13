@@ -1,68 +1,71 @@
 # Orientation Analyzer Usage Guide
 
+## 🎯 **Purpose**: Analyze MAIN PHOTOS (front images), NOT back scans
+
+**Two Separate Workflows:**
+1. **Orientation Analyzer** → Main photo collection (~5000 images) → Orientation, color correction
+2. **OCR Analysis** → Back scans (_b files, ~500 images) → Metadata extraction
+
 ## 🚀 How to Invoke in Claude Code Sessions
 
-### Method 1: Direct Analysis (Preprocessed Images)
+### Method 1: Direct Analysis (Single Main Photo)
 ```
-"Analyze the orientation and quality of this prepared image using Haiku model: /tmp/fastfoto_prepared/IMG_001_b.jpg"
+"Analyze the orientation and quality of this main photo using Haiku model: /tmp/photos_prepared/IMG_001.jpg"
 ```
 
 Claude will:
 1. Use Task tool with `model="haiku"`
-2. Use Read tool on the preprocessed image
+2. Use Read tool on the downsampled image
 3. Apply orientation analysis prompt
-4. Return orientation, quality, and processing recommendations
+4. Return orientation correction and color adjustment recommendations
 
-### Method 2: Full Workflow (Large Images)
+### Method 2: Batch Analysis (Main Photo Collection)
 ```
-"Preprocess FastFoto images from ~/Photos/FastFoto then run orientation analysis using Haiku for cost efficiency"
+"Analyze orientation and color quality of main FastFoto collection using Haiku model"
 ```
 
 Claude will:
-1. Run preprocessing script to resize/convert large images
-2. Discover all prepared image files
+1. Discover all main photo files (not _b back scans)
+2. Downsample images heavily (orientation detection doesn't need high resolution)
 3. Analyze each with Haiku model
-4. Generate batch report with recommendations
-5. Filter images for detailed OCR processing
+4. Generate batch report with rotation and color correction recommendations
 
 ## 📏 **Image Size Handling**
 
-### ⚠️ **REQUIRES Preprocessing for Large Images**
+### ✅ **Aggressive Downsampling for Orientation Analysis**
 
-**Claude Code Read Tool Limits (ALL models):**
-- **Max dimension**: 2000px
-- **Max file size**: ~5MB
-- **Formats**: JPEG, PNG, GIF, WebP
+**Orientation Detection Requirements:**
+- **Purpose**: Detect rotation (90°, 180°, 270°), color balance
+- **Resolution needed**: Very low! 600-800px max dimension is plenty
+- **File size**: Can be ~500KB-1MB (much smaller than OCR analysis)
 
-**Your FastFoto Images:**
-- Typical scanned photos: 3000-6000px dimension
-- File sizes: Usually 10-50MB for high-quality scans
-- **Result**: Need preprocessing before ANY Claude Code analysis!
+**Your Main Photo Collection:**
+- Typical main photos: 3000-6000px dimension, 20-100MB
+- **Downsampled for orientation**: 600px dimension, ~500KB
+- **Result**: Much faster processing, optimized for visual analysis!
 
 ### 🎯 **Workflow Integration**
 
-**Option A: Two-Stage Preprocessing (Recommended)**
+**Combined Preprocessing + Analysis (Recommended)**
 ```
-User: "First preprocess FastFoto images for analysis, then run orientation analysis using Haiku"
+User: "Analyze orientation and color quality of main FastFoto photos using Haiku model"
 
 Claude:
-1. Runs preprocessing script: python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared
-2. Analyzes prepared images with Haiku (~$2-5 for 500 images)
-3. Filters out unusable images (blur, poor quality)
-4. Fixes orientation issues automatically
-5. Processes good candidates with Sonnet OCR (~$50-100)
-6. Total cost savings: 50-70% vs processing everything
+1. Auto-downsamples large images to ~600px (orientation analysis only)
+2. Analyzes ALL main photos with Haiku model
+3. Generates rotation correction recommendations
+4. Suggests color/brightness adjustments
+5. Creates batch processing script for corrections
 ```
 
-**Option B: Parallel Processing**
+**Separate from Back Scan OCR:**
 ```
-User: "Process FastFoto images with both orientation analysis and detailed OCR"
+User: "Process FastFoto back scans for metadata extraction"
 
 Claude:
-1. Runs orientation analysis (Haiku) in parallel
-2. Runs detailed OCR (Sonnet) in parallel
-3. Cross-references results for quality validation
-4. Provides comprehensive analysis
+1. Uses existing preprocess_images.py for back scans (_b files)
+2. Runs detailed Sonnet OCR on all back scans
+3. Extracts dates, locations, people for EXIF updates
 ```
 
 ## 🔧 **Integration with Current Workflow**
@@ -95,66 +98,50 @@ class EnhancedInteractiveProcessor:
         return orientation_results, ocr_results
 ```
 
-## 💰 **Cost Benefits**
+## 🎯 **Technical Benefits**
 
-### Example: 500 Image Collection
-
-**Without Orientation Analyzer:**
-- 500 images × Sonnet OCR = ~$150-200
-
-**With Orientation Analyzer:**
-- 500 images × Haiku analysis = ~$3-5
-- 300 high-value images × Sonnet OCR = ~$90-120
-- **Total**: ~$95-125 (40-50% savings)
-
-**Plus Quality Benefits:**
-- Skip blurry/unusable images
-- Fix orientation issues automatically
-- Identify manual review cases
-- Focus OCR budget on valuable images
+**Benefits:**
+- Separate, optimized workflows for different purposes
+- Haiku perfect for orientation detection (doesn't need fine detail)
+- Sonnet focused on text extraction (where detail matters)
+- Aggressive downsampling reduces processing overhead
+- Batch processing recommendations for efficient corrections
 
 ## 🎯 **Sample Claude Code Session**
 
 ```
-User: "Preprocess and analyze orientation/quality of FastFoto images in ~/Photos/FastFoto using cost-effective approach"
+User: "Analyze orientation and color quality of main FastFoto photos using Haiku model"
 
-Claude: I'll first preprocess the images, then use OrientationAnalyzer with Haiku model for cost-effective bulk analysis.
+Claude: I'll analyze the main photo collection for orientation and color issues using Haiku model.
 
-Step 1: Preprocessing large images...
-[Runs: python src/preprocess_images.py ~/Photos/FastFoto --output /tmp/fastfoto_prepared]
-
-Step 2: Orientation analysis with Haiku...
+Processing main photos (not back scans)...
+[Auto-downsamples to ~600px for orientation analysis]
 [Uses Task tool with model="haiku"]
-[Processes prepared images in batches]
+[Processes main photo collection in batches]
 
 Results:
-📊 Analysis Summary:
-- Total images: 482
-- Needs rotation: 23 images (4.8%)
-- Skip OCR (poor quality): 67 images (13.9%)
-- High-value candidates: 315 images (65.4%)
-- Manual review: 25 images (5.2%)
+📊 Orientation Analysis Summary:
+- Total main photos: 4,847
+- Needs 90° rotation: 234 images (4.8%)
+- Needs 180° rotation: 12 images (0.2%)
+- Needs 270° rotation: 89 images (1.8%)
+- Color correction needed: 567 images (11.7%)
+- Good as-is: 3,945 images (81.4%)
 
-💰 Cost Optimization:
-- Haiku analysis cost: ~$4
-- Sonnet OCR needed for: 315 images (vs 482)
-- Estimated savings: 34.6% reduction in Sonnet usage
+🚀 Recommendations:
+1. Batch rotate 335 images with EXIF orientation flags
+2. Apply color correction to 567 images
+3. Generate processing script for bulk corrections
 
-🚀 Next Steps:
-1. Fix 23 orientation issues automatically
-2. Process 315 high-value images with detailed OCR
-3. Queue 25 images for manual review
-4. Skip 67 poor-quality images
-
-Proceed with detailed OCR? [Y/n]
+Separate workflow: Back scan OCR for metadata extraction on _b files
 ```
 
 ## 📝 **Key Advantages**
 
-1. **Cost Effective**: ~12x cheaper than Sonnet for bulk operations
-2. **Handles Large Images**: Works with unconverted FastFoto scans
-3. **Quality Filter**: Saves money by skipping poor images
-4. **Orientation Fix**: Automatically detects and suggests corrections
-5. **Smart Workflow**: Focus expensive Sonnet OCR on valuable images
+1. **Efficient Processing**: Haiku model optimized for visual analysis tasks
+2. **Aggressive Downsampling**: 600px is plenty for orientation detection
+3. **Separate Purpose**: Main photos (orientation) vs back scans (metadata)
+4. **Batch Corrections**: Generate scripts for bulk rotation/color fixes
+5. **Complementary Workflow**: Works alongside back scan OCR processing
 
-**Bottom Line**: Use this for initial analysis of your full FastFoto collection, then run detailed OCR only on the images worth processing!
+**Bottom Line**: Use this for orientation/color analysis of your main photo collection, while using the existing OCR workflow for back scan metadata extraction!

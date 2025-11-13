@@ -152,8 +152,8 @@ Analyze this photo back scan and extract structured metadata for EXIF enrichment
 ❌ WRONG: "Inverted handwritten Spanish text about Holland vacation experiences"
 ✅ CORRECT: "Kodak Advanced Photo System 99/JUN/7 11:33AM ID529-981 <25> 1KN44 Fuimos a Holland fue increible las tulipas eran [illegible] muy bonitas"
 
-❌ WRONG: "Bruce written vertically with date plus Spanish diary entries"
-✅ CORRECT: "Bruce 01/02/98 La playa estaba perfecta hoy nadamos mucho tiempo"
+❌ WRONG: "Name written vertically with date plus Spanish diary entries"
+✅ CORRECT: "Roberto 01/02/98 La playa estaba perfecta hoy nadamos mucho tiempo"
 
 **General**:
 - Report small/faint text even with low confidence
