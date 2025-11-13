@@ -377,12 +377,13 @@ class InteractiveProcessor:
 
         return generator
 
-    def apply_proposal(self, proposal_path: Path, dry_run: bool = False) -> int:
+    def apply_proposal(self, proposal_path: Path, source_dir: Path = None, dry_run: bool = False) -> int:
         """
         Apply approved changes from proposal file.
 
         Args:
             proposal_path: Path to proposal file
+            source_dir: Directory containing original photos (for path resolution)
             dry_run: If True, don't actually write EXIF or move files
 
         Returns:
@@ -420,8 +421,24 @@ class InteractiveProcessor:
                     skipped_count += 1
                     continue
 
-                original_path = Path(entry['original_path'])
-                back_path = Path(entry['back_path']) if entry.get('back_path') else None
+                # Resolve relative filename to full path
+                filename = entry['original_path']
+                if source_dir and not Path(filename).is_absolute():
+                    # Search for the file in source directory (recursively)
+                    original_path = self._find_file_in_directory(source_dir, filename)
+                    if not original_path:
+                        logger.error(f"Image file not found: {filename} in {source_dir}")
+                        error_count += 1
+                        continue
+                else:
+                    original_path = Path(filename)
+
+                # Resolve back scan path similarly
+                back_filename = entry.get('back_path')
+                if back_filename and source_dir and not Path(back_filename).is_absolute():
+                    back_path = self._find_file_in_directory(source_dir, back_filename)
+                else:
+                    back_path = Path(back_filename) if back_filename else None
                 proposed_updates = entry['proposed_updates']
 
                 try:
@@ -569,3 +586,24 @@ class InteractiveProcessor:
         if self.stats['successful'] > 0:
             confidences = [r.confidence for r in self.analysis_results if r.is_successful]
             self.stats['avg_confidence'] = sum(confidences) / len(confidences)
+
+    def _find_file_in_directory(self, directory: Path, filename: str) -> Optional[Path]:
+        """
+        Find a file by name in directory (recursive search).
+
+        Args:
+            directory: Directory to search in
+            filename: Filename to find
+
+        Returns:
+            Full path to file if found, None otherwise
+        """
+        directory = Path(directory)
+        filename = Path(filename).name  # Just the filename part
+
+        # Search recursively for the file
+        for file_path in directory.rglob('*'):
+            if file_path.is_file() and file_path.name == filename:
+                return file_path
+
+        return None
