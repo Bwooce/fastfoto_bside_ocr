@@ -112,17 +112,56 @@ For complete FastFoto processing, use this **exact phrase**:
 
 ---
 
+## 🛠️ **Available Scripts and Tools**
+
+**CRITICAL: Task tool agents MUST use existing scripts instead of creating new automation:**
+
+### **Image Preparation Scripts:**
+
+**`src/preprocess_images.py`** - Back scan preparation
+- **Purpose:** Prepares back scan images for Claude Code's Read tool
+- **Usage:** `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared`
+- **Function:** Resizes images >3.5MB to 1800px @ 85% quality, converts TIFF to JPEG
+- **Output:** Optimized files in `/tmp/fastfoto_prepared/` ready for Read tool OCR
+
+### **Orientation Analysis Scripts:**
+
+**`batch_orientation_analysis.py`** - Main photo orientation analysis
+- **Purpose:** Comprehensive orientation analysis with verification checkpoints
+- **Usage:** `python batch_orientation_analysis.py`
+- **Function:** Uses quality-first batch processing, 50-image verification checkpoints
+- **Output:** JSON orientation recommendations for main photos
+
+**`comprehensive_visual_orientation_analysis.py`** - Visual orientation analysis
+- **Purpose:** VISUAL orientation analysis (Do people look upright? Are faces oriented correctly?)
+- **Usage:** `python comprehensive_visual_orientation_analysis.py`
+- **Function:** Processes in batches of 50 max with verification checkpoints
+- **Output:** Visual assessment of orientation issues
+
+**`exif_orientation_checker.py`** - EXIF orientation verification
+- **Purpose:** Check EXIF orientation flags and metadata
+- **Usage:** `python exif_orientation_checker.py`
+- **Function:** Analyzes EXIF data for orientation discrepancies
+
+### **Manual Image Processing Commands:**
+
+**ImageMagick/magick commands** - For creating `/tmp/orientation_analysis/`
+- **Usage:** `magick "input.jpg" -resize 300x300 "output.jpg"`
+- **Purpose:** Downsample images to 300px for Read tool compatibility
+- **Function:** Creates smaller versions for efficient Read tool processing
+
 ## 📁 **File Preparation Required**
 
-**Orientation Analysis:**
-- Create `/tmp/orientation_analysis/` with downsampled images (300px) from source directory
-- Use magick/ImageMagick to resize: `magick "input.jpg" -resize 300x300 "output.jpg"`
+**Task tool agents MUST use existing scripts above rather than creating new automation:**
+
+**Orientation Analysis Options:**
+1. **Preferred:** Use `python batch_orientation_analysis.py` or `python comprehensive_visual_orientation_analysis.py`
+2. **Manual:** Create `/tmp/orientation_analysis/` with magick resize commands
+3. **FORBIDDEN:** Creating inline Python scripts or custom automation
 
 **Back Scan OCR:**
-- Run existing preprocessing: `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared`
-- This creates optimized back scan files ready for Read tool OCR processing
-
-**These preparation steps are included in the Task tool commands above.**
+- **Required:** `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared`
+- **FORBIDDEN:** Custom preprocessing scripts or inline code
 
 ---
 
