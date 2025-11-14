@@ -72,6 +72,7 @@ def main():
             r"^wc\s+",                    # Word/line counting
             r"^sort\s+",                  # Sorting
             r"^uniq\s+",                  # Uniqueness
+            r"^exiftool\s+",              # EXIF metadata operations
         ]
 
         # Allow simple piped operations for data processing
