@@ -2,25 +2,25 @@
 
 Complete FastFoto OCR analysis: extract handwritten metadata and identify rotation issues.
 
-**Note:** This does analysis and generates proposals. Use `/fastfoto-apply` afterwards to apply the extracted metadata to your images.
+**Usage:** Specify your source directory as a parameter when running this command.
 
 ## Overview
 
 This is the complete FastFoto workflow that will:
 
 1. **Analyze** your photo collection for orientation issues and extract handwritten metadata
-2. **Generate** a human-reviewable proposal file
-3. **Apply** approved EXIF updates to your original image files
+2. **Process** each back scan individually using Read tool
+3. **Extract** verbatim handwritten text and generate EXIF metadata
 
-**Source Directory:** ~/Pictures/2025_PeruScanning (modify as needed)
+## Step 1: Specify Source Directory
 
-## Step 1: Run Complete Analysis
+Please provide your source directory path (e.g., ~/Pictures/2025_PeruScanning or /path/to/your/photos).
 
-First, let's run the full analysis workflow:
+Let me know your source directory and I'll run:
 
 ```bash
-# Prepare back scans for OCR
-python src/preprocess_images.py ~/Pictures/2025_PeruScanning --output /tmp/fastfoto_prepared --force
+# Prepare back scans for OCR (replace SOURCE_DIR with your path)
+python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared --force
 ```
 
 Now I'll process all back scans using Read tool for OCR metadata extraction. **I'll skip the broken batch orientation script** and do real orientation analysis using Read tool directly. This will:

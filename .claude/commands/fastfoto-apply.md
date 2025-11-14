@@ -2,6 +2,8 @@
 
 Apply extracted metadata to original image files using exiftool commands.
 
+**Usage:** Specify your source directory path where the original photos are located.
+
 ## Prerequisites
 
 You should have completed FastFoto analysis using Read tool to extract metadata from back scans.
@@ -43,8 +45,8 @@ exiftool -Caption-Abstract="Hotel Tequendama, Marzo 1981" \
 For multiple files with similar metadata:
 
 ```bash
-# Apply GPS coordinates to all Bogotá photos
-find ~/Pictures/2025_PeruScanning -name "Bogota_*.jpg" -exec exiftool \
+# Apply GPS coordinates to all Bogotá photos (replace with your source directory)
+find [SOURCE_DIR] -name "Bogota_*.jpg" -exec exiftool \
   -GPS:GPSLatitude="4.7110" \
   -GPS:GPSLongitude="-74.0721" \
   -Keywords+="Bogotá" {} \;

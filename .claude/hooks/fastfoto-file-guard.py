@@ -40,27 +40,20 @@ def main():
 
         # Handle /tmp/ directory file creation restrictions
         if file_path.startswith("/tmp/"):
-            # Block JSON file creation - agents should use scripts exclusively
+            # Block JSON file creation - agents should use Read tool directly
             if file_path.endswith(".json"):
-                deny_with_reason(f"JSON file creation blocked - Use orchestrator.py and batch scripts instead of creating custom outputs: {os.path.basename(file_path)}")
+                deny_with_reason(f"JSON file creation blocked - Use Read tool directly instead of creating custom outputs: {os.path.basename(file_path)}")
                 return
 
-            # Allow orchestrator-generated proposal files
+            # Block comprehensive text file creation
             elif file_path.endswith(".txt"):
-                allowed_txt_patterns = [
-                    r".*_proposal\.txt$",
-                    r"exif_updates_proposal.*\.txt$",
-                    r"fastfoto_proposal\.txt$"
-                ]
-                if any(re.search(pattern, file_path) for pattern in allowed_txt_patterns):
-                    sys.exit(0)  # Allow orchestrator proposal files
-                else:
-                    deny_with_reason(f"Custom txt file creation blocked - Only orchestrator proposal files allowed: {os.path.basename(file_path)}")
-                    return
+                # Block all custom txt files - use Read tool directly instead
+                deny_with_reason(f"Custom txt file creation blocked - Use Read tool directly for individual analysis: {os.path.basename(file_path)}")
+                return
 
             # Block all other file creation in /tmp/ except image files for preparation
             elif not file_path.endswith(".jpg"):
-                deny_with_reason(f"Custom file creation blocked in /tmp/ - Use orchestrator and batch scripts only: {os.path.basename(file_path)}")
+                deny_with_reason(f"Custom file creation blocked in /tmp/ - Use Read tool directly: {os.path.basename(file_path)}")
                 return
 
         # If we reach here, the file write is allowed
