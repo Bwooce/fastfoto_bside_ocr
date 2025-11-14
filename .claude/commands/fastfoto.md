@@ -47,7 +47,7 @@ This proposal file will contain:
 - **EXIF field mappings** (Caption-Abstract, UserComment, Description, Keywords)
 - **Date conversions** to ISO format (YYYY-MM-DD)
 - **GPS coordinates** for recognized locations
-- **Specific exiftool commands** for each file
+- **Structured metadata** ready for /fastfoto-apply command
 
 **Process:**
 1. Read tool analysis of each individual back scan image
