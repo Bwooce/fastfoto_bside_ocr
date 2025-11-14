@@ -40,12 +40,15 @@
       "Bash(exiftool:*)",
       "Bash(find:*)",
       "Bash(find /tmp/fastfoto_prepared:*)",
+      "Bash(find /tmp/fastfoto_prepared -name:*)",
       "Bash(ls /tmp/fastfoto_prepared:*)",
       "Bash(ls:*)",
       "Bash(head:*)",
       "Bash(wc:*)",
       "Bash(sort:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(find /tmp/fastfoto_prepared -name \"*_b.jpg\":*)",
+      "Bash(find /tmp/fastfoto_prepared -name '*_b.jpg':*)"
     ],
     "deny": [],
     "ask": []
