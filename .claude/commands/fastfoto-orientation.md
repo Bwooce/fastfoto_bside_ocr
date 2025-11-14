@@ -10,11 +10,7 @@ First, let's downsample the main photos for efficient Read tool processing:
 mkdir -p /tmp/orientation_analysis
 ```
 
-Then create downsampled versions using ImageMagick:
-
-```bash
-find ~/Pictures/2025_PeruScanning -name "*.jpg" ! -name "*_b.jpg" -exec magick {} -resize 300x300 /tmp/orientation_analysis/{} \;
-```
+Then I'll create downsampled versions and analyze them directly with Read tool (the batch scripts are broken and generate fake simulation data):
 
 ## Step 2: Visual Orientation Analysis with Read Tool
 

@@ -113,63 +113,30 @@ For complete FastFoto processing, use this **exact phrase**:
 
 ---
 
-## 🛠️ **Available Scripts and Tools**
+## 🛠️ **Working FastFoto Workflows**
 
-**CRITICAL: Task tool agents MUST use existing scripts instead of creating new automation:**
+**✅ SLASH COMMANDS - ONLY WORKING APPROACH:**
 
-### **Image Preparation Scripts:**
+### **`/fastfoto`** - Complete OCR Analysis
+- **Purpose:** Extract handwritten metadata from all back scans
+- **Function:** Uses Read tool directly for real image analysis
+- **Output:** Structured proposal file with extracted text, dates, locations, GPS coordinates
+- **Geocoding:** Includes GPS coordinates for recognized locations (Lima, Bogotá, Dallas, etc.)
 
-**`src/orchestrator.py`** - Main FastFoto OCR orchestrator (PREFERRED)
-- **Purpose:** Complete back scan OCR workflow using Read tool
-- **Usage:** `python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt`
-- **Function:** Discovers photo pairs, analyzes back scans with Read tool, generates proposal
-- **Output:** Human-reviewable proposal file with EXIF metadata updates
+### **`/fastfoto-orientation`** - Rotation Analysis
+- **Purpose:** Identify photos needing rotation using visual inspection
+- **Function:** Uses Read tool to examine actual image content (people, text orientation)
+- **Output:** Real rotation corrections based on visual assessment
 
-**`src/preprocess_images.py`** - Manual back scan preparation
-- **Purpose:** Prepares back scan images for Claude Code's Read tool (if needed separately)
+### **`/fastfoto-apply`** - Apply EXIF Updates
+- **Purpose:** Apply extracted metadata to original image files
+- **Function:** Updates EXIF fields with OCR text, GPS coordinates, corrected dates
+- **Safety:** Includes dry-run option for preview before applying
+
+### **`src/preprocess_images.py`** - Image Preparation (✅ WORKS)
+- **Purpose:** Prepares back scan images for Read tool compatibility
 - **Usage:** `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared`
-- **Function:** Resizes images >3.5MB to 1800px @ 85% quality, converts TIFF to JPEG
-- **Output:** Optimized files in `/tmp/fastfoto_prepared/` ready for Read tool OCR
-
-### **Orientation Analysis Scripts:**
-
-**`batch_orientation_analysis.py`** - Main photo orientation analysis
-- **Purpose:** Comprehensive orientation analysis with verification checkpoints
-- **Usage:** `python batch_orientation_analysis.py`
-- **Function:** Uses quality-first batch processing, 50-image verification checkpoints
-- **Output:** JSON orientation recommendations for main photos
-
-**`comprehensive_visual_orientation_analysis.py`** - Visual orientation analysis
-- **Purpose:** VISUAL orientation analysis (Do people look upright? Are faces oriented correctly?)
-- **Usage:** `python comprehensive_visual_orientation_analysis.py`
-- **Function:** Processes in batches of 50 max with verification checkpoints
-- **Output:** Visual assessment of orientation issues
-
-**`exif_orientation_checker.py`** - EXIF orientation verification
-- **Purpose:** Check EXIF orientation flags and metadata
-- **Usage:** `python exif_orientation_checker.py`
-- **Function:** Analyzes EXIF data for orientation discrepancies
-
-### **Manual Image Processing Commands:**
-
-**ImageMagick/magick commands** - For creating `/tmp/orientation_analysis/`
-- **Usage:** `magick "input.jpg" -resize 300x300 "output.jpg"`
-- **Purpose:** Downsample images to 300px for Read tool compatibility
-- **Function:** Creates smaller versions for efficient Read tool processing
-
-## 📁 **File Preparation Required**
-
-**Task tool agents MUST use existing scripts above rather than creating new automation:**
-
-**Orientation Analysis Options:**
-1. **Preferred:** Use `python batch_orientation_analysis.py` or `python comprehensive_visual_orientation_analysis.py`
-2. **Manual:** Create `/tmp/orientation_analysis/` with magick resize commands
-3. **FORBIDDEN:** Creating inline Python scripts or custom automation
-
-**Back Scan OCR:**
-- **Required:** `python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt`
-- **Alternative:** `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared` (preparation only)
-- **FORBIDDEN:** Custom preprocessing scripts, inline code, or Read tool automation
+- **Function:** Resizes large images, converts formats for Read tool processing
 
 ---
 

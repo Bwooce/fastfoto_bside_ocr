@@ -1,6 +1,8 @@
-# Complete FastFoto OCR Workflow
+# FastFoto OCR Analysis
 
-Complete end-to-end FastPhoto OCR processing: analysis, review, and EXIF application.
+Complete FastFoto OCR analysis: extract handwritten metadata and identify rotation issues.
+
+**Note:** This does analysis and generates proposals. Use `/fastfoto-apply` afterwards to apply the extracted metadata to your images.
 
 ## Overview
 
@@ -19,16 +21,15 @@ First, let's run the full analysis workflow:
 ```bash
 # Prepare back scans for OCR
 python src/preprocess_images.py ~/Pictures/2025_PeruScanning --output /tmp/fastfoto_prepared
-
-# Analyze main photos for orientation issues
-python batch_orientation_analysis.py
 ```
 
-Now I'll process all back scans using Read tool for OCR metadata extraction. This will:
+Now I'll process all back scans using Read tool for OCR metadata extraction. **I'll skip the broken batch orientation script** and do real orientation analysis using Read tool directly. This will:
 
 - Analyze each back scan individually using Read tool
 - Extract verbatim handwritten text in multiple languages
 - Parse dates, locations, people names, and events
+- **Generate GPS coordinates** for recognized locations (Lima, Bogotá, Dallas, etc.)
+- Identify rotation issues by visual inspection of actual image content
 - Generate a comprehensive proposal file for EXIF updates
 
 **Processing all back scan files now...**
@@ -69,6 +70,7 @@ After completion, your photos will have:
 - **Description:** Event and location context
 - **Keywords:** Parsed dates, names, places
 - **DateTimeOriginal:** Corrected dates when found
-- **Orientation:** Fixed rotation issues
+- **GPS Coordinates:** Latitude/longitude for recognized locations (Lima, Bogotá, etc.)
+- **Orientation:** Fixed rotation issues based on visual content analysis
 
 Let me start the analysis process now...
