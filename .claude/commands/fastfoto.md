@@ -34,32 +34,24 @@ Now I'll process all back scans using Read tool for OCR metadata extraction. **I
 
 **Processing all back scan files now...**
 
-## Step 2: Review Extracted Metadata
+## Step 2: Process Back Scans with Read Tool
 
-After analysis completes, I'll show you the proposal file:
+After preparation completes, I'll analyze each back scan file individually using Read tool:
+- Extract verbatim handwritten text in multiple languages
+- Parse dates, locations, people names, and events
+- Generate GPS coordinates for recognized locations
+- Create metadata proposals for EXIF updates
 
-```bash
-head -50 /tmp/fastfoto_proposal.txt
-```
-
-You can review:
-- Extracted handwritten text transcriptions
-- Identified dates, locations, and people
-- Proposed EXIF field updates
-- Confidence scores for each extraction
+**Note:** This uses Read tool directly on each image - no automated scripts or simulations.
 
 ## Step 3: Apply EXIF Updates
 
-If you approve the extracted metadata, we can apply it:
+After analysis, apply extracted metadata using exiftool directly:
 
-**Option A: Dry Run (Recommended first)**
+**Manual EXIF updates based on extracted text:**
 ```bash
-python src/orchestrator.py apply /tmp/fastfoto_proposal.txt ~/Pictures/2025_PeruScanning --dry-run
-```
-
-**Option B: Apply Real Updates**
-```bash
-python src/orchestrator.py apply /tmp/fastfoto_proposal.txt ~/Pictures/2025_PeruScanning
+# Example commands for specific files (generated during analysis)
+exiftool -Caption-Abstract="Extracted handwritten text" -GPS:GPSLatitude="4.7110" -GPS:GPSLongitude="-74.0721" image.jpg
 ```
 
 ## Expected Results
