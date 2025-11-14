@@ -36,13 +36,26 @@ Now I'll process all back scans using Read tool for OCR metadata extraction. **I
 
 ## Step 2: Process Back Scans with Read Tool
 
-After preparation completes, I'll analyze each back scan file individually using Read tool:
-- Extract verbatim handwritten text in multiple languages
-- Parse dates, locations, people names, and events
-- Generate GPS coordinates for recognized locations
-- Create metadata proposals for EXIF updates
+After preparation completes, I'll analyze each back scan file individually using Read tool and create:
 
-**Note:** This uses Read tool directly on each image - no automated scripts or simulations.
+```
+/tmp/fastfoto_proposal.txt
+```
+
+This proposal file will contain:
+- **Verbatim transcriptions** from each back scan (no interpretation)
+- **EXIF field mappings** (Caption-Abstract, UserComment, Description, Keywords)
+- **Date conversions** to ISO format (YYYY-MM-DD)
+- **GPS coordinates** for recognized locations
+- **Specific exiftool commands** for each file
+
+**Process:**
+1. Read tool analysis of each individual back scan image
+2. Extract handwritten text exactly as written
+3. Parse dates, locations, and people names from real text
+4. Generate structured proposal for EXIF metadata updates
+
+**Note:** This uses Read tool directly on each image - real analysis, no simulations.
 
 ## Step 3: Apply EXIF Updates
 
