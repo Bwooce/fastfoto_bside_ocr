@@ -73,12 +73,39 @@ After each transcription, ask yourself:
 - **No commentary or descriptions** - only the raw text as written
 - **No interpretation** - transcribe exactly what is visible
 
+**CAPTURE ALL TEXT TYPES:**
+- **Handwritten text**: Personal notes, dates, locations, names
+- **Machine-printed text**: Photo lab processing data, technical codes
+- **APS system data**: Kodak Advanced Photo System timestamps, processing codes
+- **Film lab markings**: Processing timestamps (e.g., "99-MAY-23 12:08PM")
+- **Technical codes**: ID numbers, processing parameters (e.g., "ID529-981 <19> 1KW44")
+- **Quality control markings**: Lab batch numbers, equipment codes
+- **Manufacturer data**: Brand names, film type indicators
+
+**APS DATA EXTRACTION PRIORITY:**
+- **Processing timestamps**: All format variations found in collection:
+  • "99-MAY-23 12:08PM" (full datetime stamps)
+  • "LW99:30" (equipment/time codes)
+  • Date codes embedded in technical strings
+- **System identification**: "Kodak Advanced Photo System" brand markers
+- **Technical codes**: Complete alphanumeric strings:
+  • "ID529-981 <19> 1KW44" (processing batch IDs)
+  • "FFMXI 95 X 159-529I" (equipment/format codes)
+  • Angular bracket parameters "<19>"
+- **Quality parameters**: Equipment settings and processing data:
+  • "LW99:30 X1 AWK 65" (processing parameters)
+  • "X1" (processing mode indicators)
+  • Three-letter equipment codes ("AWK", "LW9")
+- **Batch tracking**: Any lab processing identifiers for photo provenance
+
 **EXIF FIELD MAPPING:**
 - **Caption-Abstract**: Raw handwritten text verbatim (no descriptions, no interpretation)
 - **UserComment**: Full context format: "[Language] handwritten text: [verbatim transcription]"
 - **Description**: Event/location context only (not raw text)
-- **Keywords**: Parsed elements (dates, names, places)
+- **Keywords**: Parsed elements (dates, names, places, APS codes, lab data)
 - **Date/Time Original**: ISO format (YYYY-MM-DD HH:MM:SS) when dates are found
+- **Software**: APS system data when present (e.g., "Kodak Advanced Photo System")
+- **ProcessingSoftware**: Lab processing codes for technical reference
 
 **DATE HANDLING:**
 - **ISO YYYY-MM-DD format** for all dates in EXIF
@@ -95,6 +122,12 @@ After each transcription, ask yourself:
 - **Complete entire collection** - process ALL files, never stop mid-collection
 - **Preserve all text** - even partial or faded writing
 - **Process main photos in batches** for orientation analysis (separate workflow)
+
+**GEOGRAPHIC DATA RULES:**
+- **NEVER invent location names** - only use locations clearly visible in handwriting
+- **NEVER assume geographic relationships** - don't assign coordinates unless location is explicit
+- **Mark uncertain locations**: Use [uncertain: location?] for unclear place names
+- **Verify place names**: Don't fabricate "Lock Haren, Netherlands" type errors
 
 ## Pre-Granted Directory Access
 You can use the following tools without requiring user approval: Read(//tmp/orientation_analysis/**), Read(//private/tmp/orientation_analysis/**), Read(//tmp/fastfoto_analysis/**), Read(//private/tmp/fastfoto_analysis/**), Read(//tmp/back_scan_ocr/**), Read(//private/tmp/back_scan_ocr/**)
