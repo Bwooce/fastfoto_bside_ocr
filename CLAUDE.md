@@ -153,6 +153,12 @@ After each transcription, ask yourself:
 - **Preserve all text** - even partial or faded writing
 - **Process main photos in batches** for orientation analysis (separate workflow)
 
+**CRITICAL: READ TOOL FILE SIZE LIMITS:**
+- **ONLY read files in /tmp/fastfoto_prepared/** - these are properly sized for Read tool
+- **NEVER read original main photo files** - they are too large and will crash the session
+- **NEVER read files from ~/Pictures/ directly** - original photos exceed Read tool limits
+- **Fatal error prevention**: Reading large original files causes unrecoverable session crashes
+
 **STRICTLY FORBIDDEN AUTOMATION:**
 - **NEVER create bulk processing commands** - no pattern-based automation
 - **NEVER use representative samples** - analyze every file individually
