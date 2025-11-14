@@ -29,7 +29,8 @@
       "Bash(mkdir:*)",
       "Bash(magick:*)",
       "Bash(python src/preprocess_images.py:*)",
-      "Bash(exiftool:*)"
+      "Bash(exiftool:*)",
+      "Bash(find /tmp/fastfoto_prepared:*)"
     ],
     "deny": [],
     "ask": []
