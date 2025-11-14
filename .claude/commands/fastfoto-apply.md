@@ -29,14 +29,14 @@ exiftool -Caption-Abstract="[Verbatim handwritten text]" \
 Based on common findings from back scan analysis:
 
 ```bash
-# Example: Bogotá photos with Spanish text
-exiftool -Caption-Abstract="Hotel Tequendama, Marzo 1981" \
-         -UserComment="Spanish handwritten text: Hotel Tequendama, Marzo 1981" \
-         -Description="Hotel stay in Bogotá" \
-         -Keywords="Bogotá, hotel, 1981, March" \
-         -DateTimeOriginal="1981-03-01 00:00:00" \
-         -GPS:GPSLatitude="4.7110" \
-         -GPS:GPSLongitude="-74.0721" \
+# Example: Based on extracted handwritten text
+exiftool -Caption-Abstract="[actual extracted text]" \
+         -UserComment="Spanish handwritten text: [actual transcription]" \
+         -Description="[actual event context]" \
+         -Keywords="[actual parsed elements]" \
+         -DateTimeOriginal="[actual date in ISO format]" \
+         -GPS:GPSLatitude="[actual coordinates if location identified]" \
+         -GPS:GPSLongitude="[actual coordinates if location identified]" \
          original_photo.jpg
 ```
 
@@ -45,11 +45,11 @@ exiftool -Caption-Abstract="Hotel Tequendama, Marzo 1981" \
 For multiple files with similar metadata:
 
 ```bash
-# Apply GPS coordinates to all Bogotá photos (replace with your source directory)
-find [SOURCE_DIR] -name "Bogota_*.jpg" -exec exiftool \
-  -GPS:GPSLatitude="4.7110" \
-  -GPS:GPSLongitude="-74.0721" \
-  -Keywords+="Bogotá" {} \;
+# Apply GPS coordinates to photos from identified location
+find [SOURCE_DIR] -name "[location_pattern]_*.jpg" -exec exiftool \
+  -GPS:GPSLatitude="[actual_latitude]" \
+  -GPS:GPSLongitude="[actual_longitude]" \
+  -Keywords+="[actual_location]" {} \;
 ```
 
 ## Step 4: Verify Updates
