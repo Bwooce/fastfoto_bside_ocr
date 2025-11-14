@@ -12,6 +12,9 @@
       "Read(//tmp/*_analysis_*.txt)",
       "Read(//tmp/ANALYSIS_*.txt)",
       "Read(//tmp/QUICK_REFERENCE_*.txt)",
+      "Read(//tmp/*_proposal.txt)",
+      "Read(//tmp/fastfoto_proposal.txt)",
+      "Read(//tmp/exif_updates_proposal*.txt)",
       "Write(//tmp/fastfoto_*.json)",
       "Write(//tmp/orientation_*.json)",
       "Write(//tmp/*_analysis_*.json)",
@@ -20,9 +23,16 @@
       "Write(//tmp/*_analysis_*.txt)",
       "Write(//tmp/ANALYSIS_*.txt)",
       "Write(//tmp/QUICK_REFERENCE_*.txt)",
+      "Write(//tmp/*_proposal.txt)",
+      "Write(//tmp/fastfoto_proposal.txt)",
+      "Write(//tmp/exif_updates_proposal*.txt)",
       "Bash(mkdir:*)",
       "Bash(magick:*)",
-      "Bash(python src/preprocess_images.py:*)"
+      "Bash(python src/preprocess_images.py:*)",
+      "Bash(python src/orchestrator.py:*)",
+      "Bash(python batch_orientation_analysis.py:*)",
+      "Bash(python comprehensive_visual_orientation_analysis.py:*)",
+      "Bash(python exif_orientation_checker.py:*)"
     ],
     "deny": [],
     "ask": []
