@@ -1,48 +1,54 @@
 # Apply FastFoto EXIF Updates
 
-Apply extracted metadata to original image files after reviewing the proposal.
+Apply extracted metadata to original image files using exiftool commands.
 
 ## Prerequisites
 
-You should have already run `/fastfoto-analysis` which generated a proposal file at `/tmp/fastfoto_proposal.txt`.
+You should have completed FastFoto analysis using Read tool to extract metadata from back scans.
 
-## Step 1: Review the Proposal
+## Step 1: Apply Extracted Metadata
 
-Let me first show you the proposal file so you can review the extracted metadata:
-
-```bash
-cat /tmp/fastfoto_proposal.txt
-```
-
-## Step 2: Apply EXIF Updates (Dry Run First)
-
-Before making actual changes, let's do a dry run to see what would be updated:
+Based on the verbatim text extracted from each back scan, apply EXIF metadata:
 
 ```bash
-python src/orchestrator.py apply /tmp/fastfoto_proposal.txt ~/Pictures/2025_PeruScanning --dry-run
+# Template command for applying extracted metadata:
+exiftool -Caption-Abstract="[Verbatim handwritten text]" \
+         -UserComment="[Language] handwritten text: [transcription]" \
+         -Description="[Event/location context]" \
+         -Keywords="[parsed dates, names, locations]" \
+         -DateTimeOriginal="[YYYY-MM-DD HH:MM:SS]" \
+         -GPS:GPSLatitude="[latitude]" \
+         -GPS:GPSLongitude="[longitude]" \
+         [original_image.jpg]
 ```
 
-This will show you:
-- Which files would be updated
-- What EXIF fields would be modified
-- What metadata would be added
-- Any potential issues or warnings
+## Step 2: Example Applications
 
-## Step 3: Apply Real EXIF Updates
-
-If the dry run looks good and you approve the changes, apply them to the actual image files:
+Based on common findings from back scan analysis:
 
 ```bash
-python src/orchestrator.py apply /tmp/fastfoto_proposal.txt ~/Pictures/2025_PeruScanning
+# Example: Bogotá photos with Spanish text
+exiftool -Caption-Abstract="Hotel Tequendama, Marzo 1981" \
+         -UserComment="Spanish handwritten text: Hotel Tequendama, Marzo 1981" \
+         -Description="Hotel stay in Bogotá" \
+         -Keywords="Bogotá, hotel, 1981, March" \
+         -DateTimeOriginal="1981-03-01 00:00:00" \
+         -GPS:GPSLatitude="4.7110" \
+         -GPS:GPSLongitude="-74.0721" \
+         original_photo.jpg
 ```
 
-This will:
-- Update EXIF Caption-Abstract with verbatim handwritten text
-- Add UserComment with language-tagged transcriptions
-- Set Description fields with event/location context
-- Add Keywords with parsed dates, names, places
-- Update DateTimeOriginal when dates are found
-- Apply any rotation corrections identified
+## Step 3: Batch Processing for Similar Content
+
+For multiple files with similar metadata:
+
+```bash
+# Apply GPS coordinates to all Bogotá photos
+find ~/Pictures/2025_PeruScanning -name "Bogota_*.jpg" -exec exiftool \
+  -GPS:GPSLatitude="4.7110" \
+  -GPS:GPSLongitude="-74.0721" \
+  -Keywords+="Bogotá" {} \;
+```
 
 ## Step 4: Verify Updates
 
