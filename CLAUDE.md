@@ -23,12 +23,56 @@
 - **Pay special attention to anti-demonstration and anti-optimization instructions**
 - **Project guides specify complete processing requirements vs. sample demonstrations**
 
-## Critical OCR Instructions
-- **Verbatim transcription only** - no commentary or descriptions in raw_ocr_complete field
-- **ISO YYYY-MM-DD date format** for all dates
+## **AUTOMATIC WORKFLOW TRIGGERS**
+
+**When user requests ANY of these phrases, IMMEDIATELY read and execute `ORIENTATION_ANALYZER_GUIDE.md`:**
+- "FastFoto orientation analysis" / "analyze orientation"
+- "FastFoto back scan OCR" / "back scan processing" / "process back scans"
+- "FastFoto analysis" / "process FastFoto collection"
+- "analyze main photos" + "back scan metadata"
+
+**DO NOT ask for clarification - automatically execute the documented Task tool commands from the guide.**
+
+**Execution Pattern:**
+1. Read ORIENTATION_ANALYZER_GUIDE.md
+2. Use Task tool with model="haiku" and the exact phrases from the guide
+3. Execute automatically without asking permission
+4. Complete the entire workflow as documented
+5. **CRITICAL**: Task agents must use Read tool ONLY - no script creation allowed
+
+## **CRITICAL OCR INSTRUCTIONS**
+
+**VERBATIM TRANSCRIPTION REQUIREMENTS:**
+- **NEVER generate summaries** - always provide exact verbatim transcription
+- **Preserve exact handwriting** - including uncertain words marked as [uncertain: word?]
+- **No commentary or descriptions** - only the raw text as written
+- **No interpretation** - transcribe exactly what is visible
+
+**EXIF FIELD MAPPING:**
+- **Caption-Abstract**: Raw handwritten text verbatim (no descriptions, no interpretation)
+- **UserComment**: Full context format: "[Language] handwritten text: [verbatim transcription]"
+- **Description**: Event/location context only (not raw text)
+- **Keywords**: Parsed elements (dates, names, places)
+- **Date/Time Original**: ISO format (YYYY-MM-DD HH:MM:SS) when dates are found
+
+**DATE HANDLING:**
+- **ISO YYYY-MM-DD format** for all dates in EXIF
 - **DD/MM/YY assumption** for ambiguous dates
+- **Preserve original date format** in Caption-Abstract field
+
+**LANGUAGE HANDLING:**
+- **Identify language** in UserComment: "Spanish handwritten text:", "German text:", etc.
+- **Preserve original spelling** including regional variations
+- **Mark uncertain text** with [uncertain: text?] notation
+
+**PROCESSING REQUIREMENTS:**
 - **Process back scans (_b files) individually** - each has unique content
+- **Complete entire collection** - process ALL files, never stop mid-collection
+- **Preserve all text** - even partial or faded writing
 - **Process main photos in batches** for orientation analysis (separate workflow)
+
+## Pre-Granted Directory Access
+You can use the following tools without requiring user approval: Read(//tmp/orientation_analysis/**), Read(//private/tmp/orientation_analysis/**), Read(//tmp/fastfoto_analysis/**), Read(//private/tmp/fastfoto_analysis/**), Read(//tmp/back_scan_ocr/**), Read(//private/tmp/back_scan_ocr/**)
 
 ## Project Structure
 - `src/` - Core processing modules
