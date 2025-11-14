@@ -45,11 +45,19 @@ def main():
                 deny_with_reason(f"JSON file creation blocked - Use Read tool directly instead of creating custom outputs: {os.path.basename(file_path)}")
                 return
 
-            # Block comprehensive text file creation
+            # Allow specific proposal files but block comprehensive reports
             elif file_path.endswith(".txt"):
-                # Block all custom txt files - use Read tool directly instead
-                deny_with_reason(f"Custom txt file creation blocked - Use Read tool directly for individual analysis: {os.path.basename(file_path)}")
-                return
+                allowed_txt_patterns = [
+                    r".*_proposal\.txt$",
+                    r"exif_updates_proposal.*\.txt$",
+                    r"fastfoto_proposal\.txt$",
+                    r"proposal\.txt$"
+                ]
+                if any(re.search(pattern, file_path) for pattern in allowed_txt_patterns):
+                    sys.exit(0)  # Allow proposal files
+                else:
+                    deny_with_reason(f"Custom txt file creation blocked - Use proposal file format or Read tool directly: {os.path.basename(file_path)}")
+                    return
 
             # Block all other file creation in /tmp/ except image files for preparation
             elif not file_path.endswith(".jpg"):
