@@ -53,9 +53,22 @@ def main():
                     deny_with_reason(f"Unauthorized JSON file - Only FastFoto workflow outputs allowed: {os.path.basename(file_path)}")
                     return
 
-            # Block all non-JSON files in /tmp/ except approved workflow files
+            # Allow orchestrator-generated proposal files
+            elif file_path.endswith(".txt"):
+                allowed_txt_patterns = [
+                    r".*_proposal\.txt$",
+                    r"exif_updates_proposal.*\.txt$",
+                    r"fastfoto_proposal\.txt$"
+                ]
+                if any(re.search(pattern, file_path) for pattern in allowed_txt_patterns):
+                    sys.exit(0)  # Allow orchestrator proposal files
+                else:
+                    deny_with_reason(f"Custom txt file creation blocked - Only orchestrator proposal files allowed: {os.path.basename(file_path)}")
+                    return
+
+            # Block all other non-JSON files in /tmp/ except approved workflow files
             elif not file_path.endswith(".jpg"):  # Allow image files for preparation
-                deny_with_reason(f"Non-JSON file creation blocked in /tmp/ - FastFoto workflow outputs JSON only: {os.path.basename(file_path)}")
+                deny_with_reason(f"Non-JSON/proposal file creation blocked in /tmp/ - Use orchestrator for txt outputs: {os.path.basename(file_path)}")
                 return
 
         # If we reach here, the file write is allowed
