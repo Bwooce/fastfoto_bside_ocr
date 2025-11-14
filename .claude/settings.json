@@ -32,7 +32,8 @@
       "Bash(python src/orchestrator.py:*)",
       "Bash(python batch_orientation_analysis.py:*)",
       "Bash(python comprehensive_visual_orientation_analysis.py:*)",
-      "Bash(python exif_orientation_checker.py:*)"
+      "Bash(python exif_orientation_checker.py:*)",
+      "Bash(exiftool:*)"
     ],
     "deny": [],
     "ask": []
