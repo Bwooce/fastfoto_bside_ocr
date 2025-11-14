@@ -251,6 +251,12 @@ Examples:
         help='Enable verbose logging'
     )
 
+    parser.add_argument(
+        '--force', '-f',
+        action='store_true',
+        help='Overwrite existing output directory without confirmation'
+    )
+
     args = parser.parse_args()
 
     # Setup logging
@@ -271,10 +277,13 @@ Examples:
 
     # Confirm if output directory exists and is not empty
     if args.output.exists() and any(args.output.iterdir()):
-        response = input(f"Output directory {args.output} already exists and is not empty. Continue? [y/N] ")
-        if response.lower() != 'y':
-            print("Aborted.")
-            sys.exit(0)
+        if not args.force:
+            response = input(f"Output directory {args.output} already exists and is not empty. Continue? [y/N] ")
+            if response.lower() != 'y':
+                print("Aborted.")
+                sys.exit(0)
+        else:
+            print(f"Output directory {args.output} exists and is not empty. Continuing due to --force flag.")
 
     print("\n" + "="*80)
     print("FastFoto Back Scan Preprocessor")

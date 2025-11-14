@@ -20,7 +20,7 @@ First, let's run the full analysis workflow:
 
 ```bash
 # Prepare back scans for OCR
-python src/preprocess_images.py ~/Pictures/2025_PeruScanning --output /tmp/fastfoto_prepared
+python src/preprocess_images.py ~/Pictures/2025_PeruScanning --output /tmp/fastfoto_prepared --force
 ```
 
 Now I'll process all back scans using Read tool for OCR metadata extraction. **I'll skip the broken batch orientation script** and do real orientation analysis using Read tool directly. This will:
