@@ -59,13 +59,13 @@ This proposal file will contain:
 
 ## Step 3: Apply EXIF Updates
 
-After analysis, apply extracted metadata using exiftool directly:
+After analysis completes and the proposal file is created, use the dedicated command to apply the extracted metadata:
 
-**Manual EXIF updates based on extracted text:**
 ```bash
-# Example commands for specific files (generated during analysis)
-exiftool -Caption-Abstract="Extracted handwritten text" -GPS:GPSLatitude="4.7110" -GPS:GPSLongitude="-74.0721" image.jpg
+/fastfoto-apply [your_source_directory]
 ```
+
+This will read the proposal file and apply all extracted metadata to your original photo files.
 
 ## Expected Results
 
