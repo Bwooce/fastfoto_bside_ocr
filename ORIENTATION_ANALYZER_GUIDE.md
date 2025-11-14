@@ -1,187 +1,142 @@
-# Orientation Analyzer - SIMPLE USAGE
+# FastFoto Analysis - Task Tool Instructions
 
-## ⚠️ **JUST RUN THE EXISTING TOOL - NO EXPLORATION NEEDED**
+## 🚨 **TASK TOOL AGENTS: READ THIS FIRST**
 
-When a user says: **"Analyze orientation of main FastFoto photos with verification checkpoints"**
+**MANDATORY: Use model="haiku" and Read tool ONLY. NO script creation allowed.**
 
-**DO THIS IMMEDIATELY:**
-```bash
-python src/orientation_analyzer.py /path/to/photos
-```
+**ABSOLUTELY FORBIDDEN:**
+- Creating ANY bash scripts, Python files, or automation tools
+- Creating comprehensive reports, summaries, or implementation guides
+- Using sampling or pattern-based extrapolation
+- Creating multiple output files
 
-## ❌ **DO NOT DO ANY OF THIS:**
-- ❌ Create project overview documents
-- ❌ Use Explore tool to understand codebase
-- ❌ Write new scripts or code
-- ❌ Set up todo lists for exploration
-- ❌ Create comprehensive documentation
+**REQUIRED OUTPUT: SINGLE JSON FILE ONLY - NO TEXT FILES, NO DOCUMENTATION**
 
-## ✅ **JUST RUN THE TOOL DIRECTLY:**
+## ⚠️ **USE TASK TOOL ONLY - NO CODE WRITING**
 
-**For batch analysis of a directory, use the Task tool:**
+This guide provides exact phrases for FastFoto analysis using Claude Code's Task tool with Read tool integration.
 
-```
-Use Task tool with:
-- subagent_type: "general-purpose"
-- model: "haiku"
-- prompt: "Run comprehensive orientation analysis on all main photos in ~/Pictures/2025_PeruScanning using the existing OrientationAnalyzer class. Process in batches of 50 photos max with verification checkpoints. For each photo, analyze if people/scenes look correctly oriented when displayed. Generate /tmp/orientation_exif_recommendations.json with specific rotation recommendations for any photos that need fixing."
-```
+---
 
-**The analysis must verify:** "Do people look upright? Does the scene make visual sense?"
+## 🔄 **Orientation Analysis**
 
-## 🔧 **CRITICAL: Technical Requirements**
-
-**Image Size Handling:**
-- ✅ **Automatic downsampling**: Images downsampled to 300px max dimension
-- ✅ **Prevents Read tool failures**: Large images (10MB+) will break Read tool
-- ✅ **Quality maintained**: LANCZOS resampling preserves orientation details
-
-**Visual Analysis Requirements:**
-- ✅ **Content-based checking**: Look at people, faces, text, buildings
-- ✅ **Rotation detection**: Identify 90°, 180°, 270° corrections needed
-- ✅ **Verification checkpoints**: Manual spot-checks every 50 photos
-- ✅ **Quality over speed**: Better to take time and catch all issues
-
-**Output Requirements:**
-- ✅ **EXIF recommendations**: `/tmp/orientation_exif_recommendations.json`
-- ✅ **Specific rotations**: Exact degree corrections for each problem image
-- ✅ **Visual context**: "Person appears sideways, needs 90° clockwise rotation"
-
-**ACCURACY-FOCUSED APPROACH - Quality over speed!**
-
-Claude will:
-1. Auto-discover main photos (excludes _b back scans) - **silent background**
-2. Process in **SMALL verified batches** (max 50 images per batch)
-3. **🚨 MANDATORY: Individual analysis for any photo with EXIF orientation ≠ 1**
-4. **Verification checkpoint every 50 photos** - manual spot checks
-5. **Content validation**: "Does this photo look correct as displayed?"
-6. Update EXIF orientation flags only after verification
-
-**Quality-First Processing:**
-- ❌ **Large batches**: No 100-200 image mega-batches that miss issues
-- ❌ **Era bias**: Don't assume newer photos are correctly oriented
-- ❌ **Speed over accuracy**: Don't prioritize token efficiency over correctness
-- ❌ **Multiple output files**: No /tmp/all_main_photos.txt, no duplicate JSON reports
-- ✅ **Small verified batches**: Max 50 images per batch with verification
-- ✅ **Mandatory individual analysis**: Any EXIF orientation ≠ 1 gets personal attention
-- ✅ **Content validation checkpoints**: "Does person look upright?" every 50 photos
-- ✅ **Single output file**: Only `/tmp/orientation_exif_recommendations.json`
-- ✅ **Quality gates**: No photo left unverified if orientation seems wrong
-
-## 📏 **Image Size Handling**
-
-### ✅ **Aggressive Downsampling for Orientation Analysis**
-
-**Orientation Detection Requirements:**
-- **Purpose**: Detect rotation (90°, 180°, 270°), color balance
-- **Resolution needed**: VERY low! 300-400px max dimension is sufficient
-- **File size**: Target ~100-200KB (much smaller than OCR analysis)
-
-**Your Main Photo Collection:**
-- Typical main photos: 3000-6000px dimension, 20-100MB
-- **Downsampled for orientation**: 300px dimension, ~100KB
-- **Result**: Massive token savings, sufficient for rotation detection!
-
-### 🎯 **Workflow Integration**
-
-**Combined Preprocessing + Analysis (Recommended)**
-```
-User: "Analyze orientation and color quality of main FastFoto photos using Haiku model"
-
-Claude:
-1. Auto-downsamples large images to ~300px (orientation analysis only)
-2. **Batch processes** main photos (10 per batch for token efficiency)
-3. Analyzes with Haiku model using minimal tokens
-4. Updates EXIF orientation flags (metadata only - preserves original pixels)
-5. Suggests color/brightness adjustments
-```
-
-**Separate from Back Scan OCR:**
-```
-User: "Process FastFoto back scans for metadata extraction"
-
-Claude:
-1. Uses existing preprocess_images.py for back scans (_b files)
-2. Runs detailed Sonnet OCR on all back scans
-3. Extracts dates, locations, people for EXIF updates
-```
-
-## 🔧 **Integration with Current Workflow**
-
-**The orientation analyzer integrates with the existing workflow - no new code needed!**
-
-The existing `src/orientation_analyzer.py` handles all orientation analysis automatically when you use the recommended phrase.
-
-## 🎯 **Technical Benefits**
-
-**Benefits:**
-- Separate, optimized workflows for different purposes
-- Haiku perfect for orientation detection (doesn't need fine detail)
-- Sonnet focused on text extraction (where detail matters)
-- Aggressive downsampling reduces processing overhead
-- **Non-destructive EXIF updates**: Original pixels preserved, metadata-only fixes
-- **Universal compatibility**: Apple Photos, Google Photos, Adobe Lightroom respect EXIF orientation
-- Batch processing recommendations for efficient corrections
-
-## 🎯 **Sample Claude Code Session - QUALITY-FIRST**
+When a user requests orientation analysis, use this **exact phrase**:
 
 ```
-User: "Analyze orientation of main FastFoto photos with verification checkpoints"
-
-Claude: I'll analyze main photos for orientation issues with quality-first verification.
-
-Analyzing main photo collection...
-Found 4,847 main photos (excluded 500 _b back scans)
-
-🔍 Pre-scan: Checking for existing EXIF orientation issues...
-Found 127 photos with EXIF orientation ≠ 1 (requires individual analysis)
-
-Processing batch 1/97 (50 images max)...
-Task(Verified orientation batch 1) → Done (800 tokens, 12s)
-⚠️  Found 3 photos with EXIF orientation 6 - analyzing individually...
-Individual analysis complete: 2 needed correction, 1 was correct
-
-✅ Checkpoint 1 (50 photos): Manual verification of 5 sample photos
-All verified photos display correctly with people upright ✓
-
-Processing batch 2/97 (50 images max)...
-Task(Verified orientation batch 2) → Done (750 tokens, 11s)
-Individual analysis: 1 photo with orientation 8 → corrected to 1
-
-Processing batch 3/97 (50 images max)...
-Task(Verified orientation batch 3) → Done (825 tokens, 13s)
-No orientation issues found in this batch ✓
-
-✅ Checkpoint 2 (100 photos): Content validation check passed
-
-[... continuing with verification every 50 photos ...]
-
-📊 Quality-First Analysis Complete:
-- Total photos: 4,847
-- Batches processed: 97 (max 50 per batch)
-- Individual verifications: 127 (EXIF ≠ 1)
-- Verification checkpoints: 97 (every 50 photos)
-- Rotation corrections applied: 89 images (verified accurate)
-- Processing time: 35 minutes (vs 12 min unverified)
-- Token usage: 91k total (higher but accurate)
-
-✅ All photos verified to display correctly with content validation!
-🏆 Zero missed orientation issues (vs previous batch processing bugs)
+"CRITICAL: Use Read tool ONLY - NO script creation or comprehensive documentation allowed. Analyze orientation issues by directly reading EVERY INDIVIDUAL image from /tmp/orientation_analysis/ using Read tool. Process ALL files individually in batches of 10-15 files maximum. For each specific image file, use Read tool to visually inspect if people are upright and scenes make visual sense. MANDATORY: Check files across all eras including early 2000s photos, 1990s photos, and event photos where orientation issues are most likely. NO sampling, NO pattern extrapolation, NO comprehensive reports. OUTPUT: Single JSON file ONLY named orientation_analysis_complete.json. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, or any documentation files."
 ```
 
-**Quality-First Approach:**
-1. **Small verified batches**: Max 50 images per Task call with verification
-2. **Mandatory individual analysis**: Any EXIF ≠ 1 gets personal attention
-3. **Content validation checkpoints**: Manual spot checks every 50 photos
-4. **No era bias**: Every photo series gets equal verification attention
-5. **Quality over speed**: 35 min processing vs 12 min but guaranteed accuracy
+**What this does:**
+- Creates downsampled images (300px) for efficient Read tool processing
+- Uses Task tool with Read tool for visual analysis
+- Identifies actual orientation problems (upside down, sideways photos)
+- Generates EXIF rotation recommendations
 
-## 📝 **Key Advantages**
+**Expected findings:**
+- Photos with people upside down (180° rotation needed)
+- Landscape photos in portrait orientation (90° rotation needed)
+- Portrait photos in landscape orientation (90° rotation needed)
+- Sideways group photos (90° counter-clockwise rotation needed)
 
-1. **Efficient Processing**: Haiku model optimized for visual analysis tasks
-2. **Aggressive Downsampling**: 600px is plenty for orientation detection
-3. **Separate Purpose**: Main photos (orientation) vs back scans (metadata)
-4. **Batch Corrections**: Provides EXIF orientation recommendations for bulk fixes
-5. **Complementary Workflow**: Works alongside back scan OCR processing
+---
 
-**Bottom Line**: Use this for orientation/color analysis of your main photo collection, while using the existing OCR workflow for back scan metadata extraction!
+## 📝 **Back Scan OCR Processing**
+
+When a user requests back scan metadata extraction, use this **exact phrase**:
+
+```
+"CRITICAL: Use Read tool ONLY - NO scripts, NO comprehensive documentation allowed. Process ALL back scan _b.jpg files in /tmp/fastfoto_prepared/ using Read tool directly. Read EVERY INDIVIDUAL file with Read tool to extract verbatim handwritten text. Process maximum 7 files per batch until ALL files complete. MANDATORY: Process each file individually, no sampling or extrapolation. OUTPUT: Single JSON file ONLY named back_scan_ocr_complete.json with verbatim_text (exact handwriting), language_identified, dates_found, locations_mentioned, people_names, and proposed_exif_fields for ALL processed files. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, or any documentation files. NO summaries or interpretation - verbatim transcription only."
+```
+
+**What this does:**
+- Auto-discovers all back scan (_b.jpg) files in the prepared directory
+- Uses Read tool for verbatim OCR text transcription in small batches
+- Provides exact handwritten text with no interpretation or summaries
+- Identifies language and preserves original spelling/formatting
+- Maps raw text to proper EXIF fields (Caption-Abstract, UserComment, Description)
+- Supports multilingual text (Spanish, German, English) with language tagging
+- Generates precise JSON proposals for EXIF metadata updates
+
+**Expected findings:**
+- Multiple photos with verbatim text transcriptions
+- Raw handwritten text in multiple languages (Spanish, German, English)
+- Exact date notations: "May 80", "March 1981", "July 28 1988"
+- Location names as written: "City names", "Hotel names", "Place names"
+- People names: Common first names found in handwriting
+- Event descriptions: "Birthday", "Quinceañera", "Graduation"
+- Language-tagged EXIF fields with preserved original spelling
+
+---
+
+## 🔧 **Combined Analysis**
+
+For complete FastFoto processing, use this **exact phrase**:
+
+```
+"CRITICAL: Use Read tool ONLY - NO script creation or comprehensive documentation whatsoever. Analyze orientation issues by directly reading EVERY INDIVIDUAL image from /tmp/orientation_analysis/ using Read tool. Then process EVERY INDIVIDUAL back scan file from /tmp/fastfoto_prepared/ using Read tool only. MANDATORY: Check files across all eras including early 2000s and 1990s photos where orientation issues are most likely. NO sampling, NO pattern extrapolation, NO comprehensive reports. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, FASTFOTO_ANALYSIS_SUMMARY.txt, or any documentation files. OUTPUT: Single JSON file ONLY named fastfoto_complete_analysis.json with orientation recommendations and OCR metadata for ALL analyzed files. Process in small batches until 100% complete."
+```
+
+---
+
+## ❌ **NEVER DO THIS - TASK TOOL VIOLATIONS:**
+
+- ❌ **NEVER** create bash scripts (`/tmp/process_*.sh`, `/tmp/*.py`)
+- ❌ **NEVER** use subprocess.run() or shell commands
+- ❌ **NEVER** create automation pipelines or processing tools
+- ❌ **NEVER** generate any script files whatsoever
+- ❌ **NEVER** use bash for image analysis or batch processing
+- ❌ **NEVER** create loop-based file processing scripts
+- ❌ **NEVER** use existing Python classes from the codebase
+- ❌ **NEVER** use exploration tools to understand codebase
+- ❌ **NEVER** create comprehensive reports (`ANALYSIS_SUMMARY.txt`, `QUICK_REFERENCE_IMPLEMENTATION.txt`, `FASTFOTO_ANALYSIS_SUMMARY.txt`)
+- ❌ **NEVER** generate action plans, implementation guides, or summary documents
+- ❌ **NEVER** create multiple documentation files
+- ❌ **NEVER** use sampling, pattern extrapolation, or representative analysis
+- ❌ **NEVER** stop processing before all files are individually analyzed
+- ❌ **NEVER** create any .txt files whatsoever
+
+**TASK TOOL AGENTS: If you create ANY documentation files or use sampling instead of individual file analysis, you are VIOLATING these instructions!**
+
+## ✅ **ALWAYS DO THIS - READ TOOL ONLY:**
+
+- ✅ **Use Read tool exclusively** - no other tools for image processing
+- ✅ **Read ALL files directly** from prepared directories (/tmp/orientation_analysis/, /tmp/fastfoto_prepared/)
+- ✅ **Process entire collection** - complete all files, never stop at samples
+- ✅ **Process small batches** (10-15 orientation files, 7 back scan files maximum) until complete
+- ✅ **Generate single JSON file only** after Read tool analysis
+- ✅ **Visual inspection only** - Read tool provides all image analysis capabilities
+- ✅ **Direct file access** - Read tool can access any prepared file path
+- ✅ **Simple output only** - JSON recommendations, no comprehensive documentation
+
+**TASK TOOL AGENTS: Only use Read tool for image analysis - complete all files - single JSON output only!**
+
+---
+
+## 📁 **File Preparation Required**
+
+**Orientation Analysis:**
+- Create `/tmp/orientation_analysis/` with downsampled images (300px) from source directory
+- Use magick/ImageMagick to resize: `magick "input.jpg" -resize 300x300 "output.jpg"`
+
+**Back Scan OCR:**
+- Run existing preprocessing: `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared`
+- This creates optimized back scan files ready for Read tool OCR processing
+
+**These preparation steps are included in the Task tool commands above.**
+
+---
+
+## 🎯 **Success Criteria**
+
+**Orientation Analysis Success:**
+- Identifies specific photos needing rotation (not just EXIF analysis)
+- Uses visual content analysis via Read tool
+- Finds actual orientation problems like upside-down people
+
+**Back Scan OCR Success:**
+- Extracts readable text from handwritten photo backs
+- Identifies dates, locations, people, events
+- Supports multiple languages
+- Generates specific metadata proposals
+
+**Both processes bypass API integration issues by using Claude Code Read tool directly.**

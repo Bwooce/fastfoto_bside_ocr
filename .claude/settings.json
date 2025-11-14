@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Read(//tmp/orientation_analysis/**)",
+      "Read(//tmp/fastfoto_prepared/**)",
+      "Read(//tmp/fastfoto_*.json)",
+      "Read(//tmp/orientation_*.json)",
+      "Read(//tmp/*_analysis_*.json)",
+      "Read(//tmp/fastfoto_*.txt)",
+      "Read(//tmp/orientation_*.txt)",
+      "Read(//tmp/*_analysis_*.txt)",
+      "Read(//tmp/ANALYSIS_*.txt)",
+      "Read(//tmp/QUICK_REFERENCE_*.txt)",
+      "Write(//tmp/fastfoto_*.json)",
+      "Write(//tmp/orientation_*.json)",
+      "Write(//tmp/*_analysis_*.json)",
+      "Write(//tmp/fastfoto_*.txt)",
+      "Write(//tmp/orientation_*.txt)",
+      "Write(//tmp/*_analysis_*.txt)",
+      "Write(//tmp/ANALYSIS_*.txt)",
+      "Write(//tmp/QUICK_REFERENCE_*.txt)",
+      "Bash(mkdir:*)",
+      "Bash(magick:*)",
+      "Bash(python src/preprocess_images.py:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/fastfoto-file-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/fastfoto-bash-guard.py"
+          }
+        ]
+      }
+    ]
+  }
+}
