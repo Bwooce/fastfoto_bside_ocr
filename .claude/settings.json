@@ -4,6 +4,8 @@
     "allow": [
       "Read(//tmp/orientation_analysis/**)",
       "Read(//tmp/fastfoto_prepared/**)",
+      "Read(/tmp/fastfoto_prepared/**)",
+      "Read(/tmp/fastfoto_prepared/*)",
       "Read(//tmp/fastfoto_*.json)",
       "Read(//tmp/orientation_*.json)",
       "Read(//tmp/*_analysis_*.json)",
@@ -15,6 +17,8 @@
       "Read(//tmp/*_proposal.txt)",
       "Read(//tmp/fastfoto_proposal.txt)",
       "Read(//tmp/exif_updates_proposal*.txt)",
+      "Read(/tmp/fastfoto_proposal.txt)",
+      "Read(/tmp/*_proposal.txt)",
       "Write(//tmp/fastfoto_*.json)",
       "Write(//tmp/orientation_*.json)",
       "Write(//tmp/*_analysis_*.json)",
@@ -29,6 +33,7 @@
       "Write(/tmp/fastfoto_proposal.txt)",
       "Write(/tmp/*_proposal.txt)",
       "Write(/tmp/exif_updates_proposal*.txt)",
+      "Write(/tmp/fastfoto_*.txt)",
       "Bash(mkdir:*)",
       "Bash(magick:*)",
       "Bash(python src/preprocess_images.py:*)",
@@ -36,8 +41,11 @@
       "Bash(find:*)",
       "Bash(find /tmp/fastfoto_prepared:*)",
       "Bash(ls /tmp/fastfoto_prepared:*)",
+      "Bash(ls:*)",
       "Bash(head:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
