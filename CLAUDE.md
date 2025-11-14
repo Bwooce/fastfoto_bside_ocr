@@ -83,10 +83,18 @@ After each transcription, ask yourself:
 - **Manufacturer data**: Brand names, film type indicators
 
 **APS DATA EXTRACTION PRIORITY:**
-- **Processing timestamps**: All format variations found in collection:
-  • "99-MAY-23 12:08PM" (full datetime stamps)
-  • "LW99:30" (equipment/time codes)
-  • Date codes embedded in technical strings
+- **Processing timestamps**: All APS date format variations:
+  • Full datetime: "99-MAY-23 12:08PM", "1999-MAY-23 12:08PM"
+  • Date separators: "99-MAY-23", "99/MAY/23", "99.MAY.23"
+  • Month formats: "MAY", "May", "05", "5"
+  • Day formats: "23", "03", "3"
+  • Year formats: "99", "1999"
+  • Order variations: "DD-MM-YY", "MM-DD-YY", "YY-MM-DD"
+  • Time formats: "12:08PM", "12:08", "1208", "24:08"
+  • Equipment codes: "LW99:30", "LW1999:30", "LW99-30", "LW99.30"
+  • Technical timestamps: "99MAY23", "990523", "990523120800"
+  • Mixed separators: "99-05-23", "05/23/99", "23.05.1999"
+  • Embedded in processing strings: "FFMXI95X159-529I"
 - **System identification**: "Kodak Advanced Photo System" brand markers
 - **Technical codes**: Complete alphanumeric strings:
   • Film roll IDs: "ID529-981", "IDnnn-nnn", or "nnn-nnn" patterns
@@ -131,9 +139,12 @@ After each transcription, ask yourself:
 
 **GEOGRAPHIC DATA RULES:**
 - **NEVER invent location names** - only use locations clearly visible in handwriting
-- **NEVER assume geographic relationships** - don't assign coordinates unless location is explicit
+- **NEVER guess or generalize coordinates** - GPS coordinates only for explicitly identified cities/landmarks
+- **NEVER assume geographic relationships** - don't assign country coordinates for unclear city names
 - **Mark uncertain locations**: Use [uncertain: location?] for unclear place names
-- **Verify place names**: Don't fabricate "Lock Haren, Netherlands" type errors
+- **Verify place names**: Don't fabricate "Lock Haren, Netherlands" type geographic errors
+- **No approximation**: Don't assign regional coordinates when specific location is unclear
+- **Explicit identification only**: Location must be clearly readable and identifiable to assign GPS data
 
 ## Pre-Granted Directory Access
 You can use the following tools without requiring user approval: Read(//tmp/orientation_analysis/**), Read(//private/tmp/orientation_analysis/**), Read(//tmp/fastfoto_analysis/**), Read(//private/tmp/fastfoto_analysis/**), Read(//tmp/back_scan_ocr/**), Read(//private/tmp/back_scan_ocr/**)
