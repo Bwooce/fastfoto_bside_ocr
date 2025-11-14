@@ -89,13 +89,19 @@ After each transcription, ask yourself:
   • Date codes embedded in technical strings
 - **System identification**: "Kodak Advanced Photo System" brand markers
 - **Technical codes**: Complete alphanumeric strings:
-  • "ID529-981 <19> 1KW44" (processing batch IDs)
-  • "FFMXI 95 X 159-529I" (equipment/format codes)
-  • Angular bracket parameters "<19>"
+  • Film roll IDs: "ID529-981", "IDnnn-nnn", or "nnn-nnn" patterns
+  • Processing batch IDs: "ID529-981 <19> 1KW44" (full processing strings)
+  • Equipment/format codes: "FFMXI 95 X 159-529I"
+  • Angular bracket parameters: "<19>" (frame numbers or processing modes)
 - **Quality parameters**: Equipment settings and processing data:
   • "LW99:30 X1 AWK 65" (processing parameters)
   • "X1" (processing mode indicators)
   • Three-letter equipment codes ("AWK", "LW9")
+- **Film identification patterns**: All numeric/alphanumeric roll tracking:
+  • "ID529-981" (full ID prefix format)
+  • "529-981" (numeric-only format)
+  • "159-529" (alternative numeric patterns)
+  • Roll numbers, batch codes, sequence identifiers
 - **Batch tracking**: Any lab processing identifiers for photo provenance
 
 **EXIF FIELD MAPPING:**
