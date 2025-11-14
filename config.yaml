@@ -20,6 +20,11 @@ processing:
   resized_image_max_dimension: 2000  # Max width/height in pixels
   resized_image_quality: 85  # JPEG quality (1-100)
 
+# Date Parsing Configuration
+date_parsing:
+  min_year: 1950
+  max_year: 2030
+
 # File Patterns
 files:
   input_extensions: [".jpg", ".jpeg", ".tif", ".tiff", ".JPG", ".JPEG", ".TIF", ".TIFF"]
