@@ -29,7 +29,7 @@ def main():
             r".*<<.*>\s*.*\.sh",          # any heredoc to .sh file
             r"python3?\s+-c.*subprocess", # subprocess automation
             r"python3?\s+-c.*os\.system", # system call automation
-            r"find.*-exec",               # find with exec (automation)
+            r"find.*-exec.*python",       # find with exec python (automation)
             r"xargs.*python",             # xargs automation
         ]
 
