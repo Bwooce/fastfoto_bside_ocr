@@ -10,7 +10,7 @@
 - Using sampling or pattern-based extrapolation
 - Creating multiple output files
 
-**REQUIRED OUTPUT: SINGLE JSON FILE ONLY - NO TEXT FILES, NO DOCUMENTATION**
+**REQUIRED: USE ORCHESTRATOR AND BATCH SCRIPTS ONLY - NO CUSTOM FILES**
 
 ## ⚠️ **USE TASK TOOL ONLY - NO CODE WRITING**
 
@@ -23,14 +23,14 @@ This guide provides exact phrases for FastFoto analysis using Claude Code's Task
 When a user requests orientation analysis, use this **exact phrase**:
 
 ```
-"CRITICAL: Use Read tool ONLY - NO script creation or comprehensive documentation allowed. Analyze orientation issues by directly reading EVERY INDIVIDUAL image from /tmp/orientation_analysis/ using Read tool. Process ALL files individually in batches of 10-15 files maximum. For each specific image file, use Read tool to visually inspect if people are upright and scenes make visual sense. MANDATORY: Check files across all eras including early 2000s photos, 1990s photos, and event photos where orientation issues are most likely. NO sampling, NO pattern extrapolation, NO comprehensive reports. OUTPUT: Single JSON file ONLY named orientation_analysis_complete.json. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, or any documentation files."
+"CRITICAL: Use existing batch script ONLY - NO custom automation, NO Read tool scripts allowed. Run: python batch_orientation_analysis.py to analyze ALL main photos for orientation issues. The batch script handles Read tool integration internally and processes files systematically. MANDATORY: Use the tested workflow only, no custom approaches or sampling. OUTPUT: Batch script generates orientation analysis results as designed. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, custom JSON files, or any documentation files. Use batch_orientation_analysis.py exclusively."
 ```
 
 **What this does:**
-- Creates downsampled images (300px) for efficient Read tool processing
-- Uses Task tool with Read tool for visual analysis
+- Uses tested batch script with built-in Read tool integration
+- Processes all main photos systematically for orientation analysis
 - Identifies actual orientation problems (upside down, sideways photos)
-- Generates EXIF rotation recommendations
+- Generates orientation analysis results per script design
 
 **Expected findings:**
 - Photos with people upside down (180° rotation needed)

@@ -38,20 +38,12 @@ def main():
                 deny_with_reason(f"Documentation file blocked - FastFoto workflow requires single JSON output only, not {os.path.basename(file_path)}")
                 return
 
-        # Allow only specific FastFoto JSON outputs in /tmp/
+        # Handle /tmp/ directory file creation restrictions
         if file_path.startswith("/tmp/"):
-            allowed_json_patterns = [
-                r"fastfoto_.*\.json$",
-                r"orientation_.*\.json$",
-                r".*_analysis_.*\.json$",
-                r"back_scan_.*\.json$"
-            ]
-
-            # If it's a JSON file, it must match allowed patterns
+            # Block JSON file creation - agents should use scripts exclusively
             if file_path.endswith(".json"):
-                if not any(re.search(pattern, file_path) for pattern in allowed_json_patterns):
-                    deny_with_reason(f"Unauthorized JSON file - Only FastFoto workflow outputs allowed: {os.path.basename(file_path)}")
-                    return
+                deny_with_reason(f"JSON file creation blocked - Use orchestrator.py and batch scripts instead of creating custom outputs: {os.path.basename(file_path)}")
+                return
 
             # Allow orchestrator-generated proposal files
             elif file_path.endswith(".txt"):
@@ -66,9 +58,9 @@ def main():
                     deny_with_reason(f"Custom txt file creation blocked - Only orchestrator proposal files allowed: {os.path.basename(file_path)}")
                     return
 
-            # Block all other non-JSON files in /tmp/ except approved workflow files
-            elif not file_path.endswith(".jpg"):  # Allow image files for preparation
-                deny_with_reason(f"Non-JSON/proposal file creation blocked in /tmp/ - Use orchestrator for txt outputs: {os.path.basename(file_path)}")
+            # Block all other file creation in /tmp/ except image files for preparation
+            elif not file_path.endswith(".jpg"):
+                deny_with_reason(f"Custom file creation blocked in /tmp/ - Use orchestrator and batch scripts only: {os.path.basename(file_path)}")
                 return
 
         # If we reach here, the file write is allowed
