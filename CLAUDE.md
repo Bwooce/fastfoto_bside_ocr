@@ -65,6 +65,16 @@ After each transcription, ask yourself:
 - ❌ EXIF data will contain fabricated information
 **WHEN IN DOUBT, MARK AS UNCERTAIN**
 
+## PROPOSAL FILE FORMAT REQUIREMENTS
+
+**PROPOSAL FILE MUST CONTAIN:**
+- **Individual file entries only** - one entry per back scan file analyzed
+- **Verbatim transcriptions** from each Read tool analysis
+- **Individual EXIF field mappings** for each file
+- **NO bulk processing sections** - no "apply to remaining files" commands
+- **NO comprehensive statistics** - no collection-wide summaries
+- **NO pattern-based automation** - no "files matching pattern X get treatment Y"
+
 ## **CRITICAL OCR INSTRUCTIONS**
 
 **VERBATIM TRANSCRIPTION REQUIREMENTS:**
@@ -112,7 +122,7 @@ After each transcription, ask yourself:
   • Roll numbers, batch codes, sequence identifiers
 - **Batch tracking**: Any lab processing identifiers for photo provenance
 
-**EXIF FIELD MAPPING:**
+**EXIF FIELD MAPPING (FOR REFERENCE ONLY - DO NOT GENERATE EXIFTOOL COMMANDS):**
 - **Caption-Abstract**: Raw handwritten text verbatim (no descriptions, no interpretation)
 - **UserComment**: Full context format: "[Language] handwritten text: [verbatim transcription]"
 - **Description**: Event/location context only (not raw text)
@@ -121,10 +131,14 @@ After each transcription, ask yourself:
 - **Software**: APS system data when present (e.g., "Kodak Advanced Photo System")
 - **ProcessingSoftware**: Lab processing codes for technical reference
 
+**NOTE: These mappings are for understanding what fields to populate. DO NOT generate exiftool commands in proposal files. The /fastfoto-apply command handles exiftool command generation separately.**
+
 **DATE HANDLING:**
 - **ISO YYYY-MM-DD format** for all dates in EXIF
 - **DD/MM/YY assumption** for ambiguous dates
 - **Preserve original date format** in Caption-Abstract field
+- **APS timestamp priority**: Technical APS dates are often more accurate than handwritten dates
+- **Multiple date sources**: Note when both APS technical timestamps and handwritten dates exist
 
 **LANGUAGE HANDLING:**
 - **Identify language** in UserComment: "Spanish handwritten text:", "German text:", etc.
@@ -136,6 +150,15 @@ After each transcription, ask yourself:
 - **Complete entire collection** - process ALL files, never stop mid-collection
 - **Preserve all text** - even partial or faded writing
 - **Process main photos in batches** for orientation analysis (separate workflow)
+
+**STRICTLY FORBIDDEN AUTOMATION:**
+- **NEVER create bulk processing commands** - no pattern-based automation
+- **NEVER use representative samples** - analyze every file individually
+- **NEVER apply patterns to unanalyzed files** - each file gets Read tool analysis
+- **NEVER create filename-based generalizations** - no "apply to all [pattern] files"
+- **NO bulk GPS coordinate assignment** - coordinates only for individually verified locations
+- **NO bulk date standardization** - dates only from individual file analysis
+- **NO "remaining files processed using patterns"** - every file requires individual Read tool analysis
 
 **GEOGRAPHIC DATA RULES:**
 - **NEVER invent location names** - only use locations clearly visible in handwriting
