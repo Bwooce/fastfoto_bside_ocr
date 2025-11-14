@@ -56,6 +56,7 @@ def main():
             r"^mkdir\s+",                 # Directory creation
             r"^magick\s+",                # ImageMagick processing
             r"^python\s+src/preprocess_images\.py",  # Back scan preprocessing script
+            r"^python\s+src/orchestrator\.py",  # Main orchestrator with Read tool
             r"^python\s+batch_orientation_analysis\.py",  # Main photo orientation analysis
             r"^python\s+comprehensive_visual_orientation_analysis\.py",  # Visual orientation analysis
             r"^python\s+exif_orientation_checker\.py",  # EXIF orientation verification

@@ -45,7 +45,7 @@ When a user requests orientation analysis, use this **exact phrase**:
 When a user requests back scan metadata extraction, use this **exact phrase**:
 
 ```
-"CRITICAL: Use Read tool ONLY - NO scripts, NO comprehensive documentation allowed. Process ALL back scan _b.jpg files in /tmp/fastfoto_prepared/ using Read tool directly. Read EVERY INDIVIDUAL file with Read tool to extract verbatim handwritten text. Process maximum 7 files per batch until ALL files complete. MANDATORY: Process each file individually, no sampling or extrapolation. OUTPUT: Single JSON file ONLY named back_scan_ocr_complete.json with verbatim_text (exact handwriting), language_identified, dates_found, locations_mentioned, people_names, and proposed_exif_fields for ALL processed files. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, or any documentation files. NO summaries or interpretation - verbatim transcription only."
+"CRITICAL: Use existing orchestrator script ONLY - NO custom automation, NO Read tool scripts allowed. Run: python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt to analyze ALL back scan files. The orchestrator uses Read tool internally and generates a complete proposal file. MANDATORY: Use the tested workflow, no sampling or custom approaches. OUTPUT: Single proposal file at /tmp/fastfoto_proposal.txt with verbatim OCR text and EXIF metadata updates for ALL processed files. NEVER create custom analysis scripts, ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, or any automation files. Use orchestrator.py exclusively."
 ```
 
 **What this does:**
@@ -73,7 +73,7 @@ When a user requests back scan metadata extraction, use this **exact phrase**:
 For complete FastFoto processing, use this **exact phrase**:
 
 ```
-"CRITICAL: Use Read tool ONLY - NO script creation or comprehensive documentation whatsoever. Analyze orientation issues by directly reading EVERY INDIVIDUAL image from /tmp/orientation_analysis/ using Read tool. Then process EVERY INDIVIDUAL back scan file from /tmp/fastfoto_prepared/ using Read tool only. MANDATORY: Check files across all eras including early 2000s and 1990s photos where orientation issues are most likely. NO sampling, NO pattern extrapolation, NO comprehensive reports. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, FASTFOTO_ANALYSIS_SUMMARY.txt, or any documentation files. OUTPUT: Single JSON file ONLY named fastfoto_complete_analysis.json with orientation recommendations and OCR metadata for ALL analyzed files. Process in small batches until 100% complete."
+"CRITICAL: Use existing orchestrator and batch scripts ONLY - NO custom automation allowed. Step 1: Run python batch_orientation_analysis.py for orientation analysis of main photos. Step 2: Run python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt for back scan OCR processing. MANDATORY: Use tested workflows only, no custom Read tool scripts or sampling. The orchestrator handles Read tool internally. OUTPUT: Orientation analysis results from batch script AND proposal file at /tmp/fastfoto_proposal.txt with complete OCR metadata. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, FASTFOTO_ANALYSIS_SUMMARY.txt, or custom automation files. Use documented scripts exclusively."
 ```
 
 ---
@@ -81,34 +81,35 @@ For complete FastFoto processing, use this **exact phrase**:
 ## ❌ **NEVER DO THIS - TASK TOOL VIOLATIONS:**
 
 - ❌ **NEVER** create bash scripts (`/tmp/process_*.sh`, `/tmp/*.py`)
-- ❌ **NEVER** use subprocess.run() or shell commands
-- ❌ **NEVER** create automation pipelines or processing tools
+- ❌ **NEVER** use subprocess.run() or shell commands for automation
+- ❌ **NEVER** create custom automation pipelines or processing tools
 - ❌ **NEVER** generate any script files whatsoever
 - ❌ **NEVER** use bash for image analysis or batch processing
 - ❌ **NEVER** create loop-based file processing scripts
-- ❌ **NEVER** use existing Python classes from the codebase
-- ❌ **NEVER** use exploration tools to understand codebase
+- ❌ **NEVER** write custom Read tool automation scripts
+- ❌ **NEVER** use direct Read tool calls in Task tool sessions
 - ❌ **NEVER** create comprehensive reports (`ANALYSIS_SUMMARY.txt`, `QUICK_REFERENCE_IMPLEMENTATION.txt`, `FASTFOTO_ANALYSIS_SUMMARY.txt`)
 - ❌ **NEVER** generate action plans, implementation guides, or summary documents
 - ❌ **NEVER** create multiple documentation files
 - ❌ **NEVER** use sampling, pattern extrapolation, or representative analysis
-- ❌ **NEVER** stop processing before all files are individually analyzed
-- ❌ **NEVER** create any .txt files whatsoever
+- ❌ **NEVER** stop processing before using documented scripts completely
+- ❌ **NEVER** create custom .txt files (EXCEPTION: orchestrator.py generates approved proposal.txt files)
 
-**TASK TOOL AGENTS: If you create ANY documentation files or use sampling instead of individual file analysis, you are VIOLATING these instructions!**
+**TASK TOOL AGENTS: Use orchestrator.py and batch scripts ONLY. Let scripts create their designed outputs. Creating custom automation or Read tool scripts violates constraints!**
 
-## ✅ **ALWAYS DO THIS - READ TOOL ONLY:**
+## ✅ **ALWAYS DO THIS - USE EXISTING SCRIPTS:**
 
-- ✅ **Use Read tool exclusively** - no other tools for image processing
-- ✅ **Read ALL files directly** from prepared directories (/tmp/orientation_analysis/, /tmp/fastfoto_prepared/)
-- ✅ **Process entire collection** - complete all files, never stop at samples
-- ✅ **Process small batches** (10-15 orientation files, 7 back scan files maximum) until complete
-- ✅ **Generate single JSON file only** after Read tool analysis
-- ✅ **Visual inspection only** - Read tool provides all image analysis capabilities
-- ✅ **Direct file access** - Read tool can access any prepared file path
-- ✅ **Simple output only** - JSON recommendations, no comprehensive documentation
+- ✅ **Use orchestrator.py exclusively** for back scan OCR processing
+- ✅ **Use batch orientation scripts** for orientation analysis (batch_orientation_analysis.py)
+- ✅ **Run documented commands only** - no custom automation
+- ✅ **Process entire collection** with existing scripts - complete workflow coverage
+- ✅ **Let scripts handle batching** - orchestrator manages Read tool internally
+- ✅ **Generate outputs per script design** - proposal files, analysis results
+- ✅ **Trust tested workflows** - scripts handle Read tool integration properly
+- ✅ **Use established patterns** - documented scripts only
+- ✅ **Follow script outputs** - proposal files, not custom JSON
 
-**TASK TOOL AGENTS: Only use Read tool for image analysis - complete all files - single JSON output only!**
+**TASK TOOL AGENTS: Use orchestrator.py and batch scripts ONLY - they handle Read tool integration correctly!**
 
 ---
 
@@ -118,8 +119,14 @@ For complete FastFoto processing, use this **exact phrase**:
 
 ### **Image Preparation Scripts:**
 
-**`src/preprocess_images.py`** - Back scan preparation
-- **Purpose:** Prepares back scan images for Claude Code's Read tool
+**`src/orchestrator.py`** - Main FastFoto OCR orchestrator (PREFERRED)
+- **Purpose:** Complete back scan OCR workflow using Read tool
+- **Usage:** `python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt`
+- **Function:** Discovers photo pairs, analyzes back scans with Read tool, generates proposal
+- **Output:** Human-reviewable proposal file with EXIF metadata updates
+
+**`src/preprocess_images.py`** - Manual back scan preparation
+- **Purpose:** Prepares back scan images for Claude Code's Read tool (if needed separately)
 - **Usage:** `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared`
 - **Function:** Resizes images >3.5MB to 1800px @ 85% quality, converts TIFF to JPEG
 - **Output:** Optimized files in `/tmp/fastfoto_prepared/` ready for Read tool OCR
@@ -160,8 +167,9 @@ For complete FastFoto processing, use this **exact phrase**:
 3. **FORBIDDEN:** Creating inline Python scripts or custom automation
 
 **Back Scan OCR:**
-- **Required:** `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared`
-- **FORBIDDEN:** Custom preprocessing scripts or inline code
+- **Required:** `python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt`
+- **Alternative:** `python src/preprocess_images.py [SOURCE_DIR] --output /tmp/fastfoto_prepared` (preparation only)
+- **FORBIDDEN:** Custom preprocessing scripts, inline code, or Read tool automation
 
 ---
 
