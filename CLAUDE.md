@@ -40,6 +40,31 @@
 4. Complete the entire workflow as documented
 5. **CRITICAL**: Task agents must use Read tool ONLY - no script creation allowed
 
+## ⚠️ CRITICAL OCR RULE - READ THIS FIRST ⚠️
+**BEFORE processing ANY image, repeat this rule out loud:**
+"I will transcribe ONLY what I can clearly see. Unclear text gets [uncertain: word?]"
+
+**FORBIDDEN:** Guessing, interpreting, or "figuring out" unclear handwriting
+**REQUIRED:** Mark unclear text as [uncertain: word?] immediately
+
+## OCR VERIFICATION CHECKLIST
+After each transcription, ask yourself:
+- [ ] Did I guess at any unclear words? (If yes, mark as [uncertain: word?])
+- [ ] Did I "interpret" context to fill gaps? (If yes, remove interpretation)
+- [ ] Can another person clearly read what I transcribed? (If no, mark uncertain)
+
+## TRANSCRIPTION EXAMPLES
+✅ CORRECT: "Hotel [uncertain: word?] March [uncertain: 1984?]"
+❌ WRONG: "Hotel Marriott March 1984" (interpreted unclear text)
+❌ WRONG: "Restaurant [something] 1993" (paraphrasing)
+✅ CORRECT: "Restaurant [uncertain: word?] 1993"
+
+## IF YOU INTERPRET INSTEAD OF TRANSCRIBE:
+- ❌ The entire OCR session becomes unreliable
+- ❌ User will question all your transcriptions
+- ❌ EXIF data will contain fabricated information
+**WHEN IN DOUBT, MARK AS UNCERTAIN**
+
 ## **CRITICAL OCR INSTRUCTIONS**
 
 **VERBATIM TRANSCRIPTION REQUIREMENTS:**
