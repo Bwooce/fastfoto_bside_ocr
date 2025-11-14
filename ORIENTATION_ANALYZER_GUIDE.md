@@ -10,7 +10,7 @@
 - Using sampling or pattern-based extrapolation
 - Creating multiple output files
 
-**REQUIRED: USE ORCHESTRATOR AND BATCH SCRIPTS ONLY - NO CUSTOM FILES**
+**REQUIRED: USE SLASH COMMANDS ONLY - NO CUSTOM AUTOMATION**
 
 ## ⚠️ **USE TASK TOOL ONLY - NO CODE WRITING**
 
@@ -45,7 +45,7 @@ When a user requests orientation analysis, use this **exact phrase**:
 When a user requests back scan metadata extraction, use this **exact phrase**:
 
 ```
-"CRITICAL: Use existing orchestrator script ONLY - NO custom automation, NO Read tool scripts allowed. Run: python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt to analyze ALL back scan files. The orchestrator uses Read tool internally and generates a complete proposal file. MANDATORY: Use the tested workflow, no sampling or custom approaches. OUTPUT: Single proposal file at /tmp/fastfoto_proposal.txt with verbatim OCR text and EXIF metadata updates for ALL processed files. NEVER create custom analysis scripts, ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, or any automation files. Use orchestrator.py exclusively."
+"CRITICAL: Use /fastfoto slash command ONLY - NO custom automation, NO scripts allowed. The slash command uses Read tool directly for individual back scan analysis. MANDATORY: Process files individually using Read tool for verbatim OCR transcription. OUTPUT: Individual EXIF metadata updates based on real handwritten text extraction. NEVER create comprehensive reports, ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, or automation files. Use /fastfoto slash command exclusively."
 ```
 
 **What this does:**
@@ -73,7 +73,7 @@ When a user requests back scan metadata extraction, use this **exact phrase**:
 For complete FastFoto processing, use this **exact phrase**:
 
 ```
-"CRITICAL: Use existing orchestrator and batch scripts ONLY - NO custom automation allowed. Step 1: Run python batch_orientation_analysis.py for orientation analysis of main photos. Step 2: Run python src/orchestrator.py scan [SOURCE_DIR] --output /tmp/fastfoto_proposal.txt for back scan OCR processing. MANDATORY: Use tested workflows only, no custom Read tool scripts or sampling. The orchestrator handles Read tool internally. OUTPUT: Orientation analysis results from batch script AND proposal file at /tmp/fastfoto_proposal.txt with complete OCR metadata. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, FASTFOTO_ANALYSIS_SUMMARY.txt, or custom automation files. Use documented scripts exclusively."
+"CRITICAL: Use slash commands ONLY - NO custom automation allowed. Step 1: Run /fastfoto-orientation for visual orientation analysis of main photos. Step 2: Run /fastfoto for back scan OCR processing using Read tool directly. MANDATORY: Use slash commands only, no custom scripts or batch processing. Commands use Read tool internally for individual file analysis. OUTPUT: Real visual orientation assessment AND individual EXIF metadata updates based on verbatim text extraction. NEVER create ANALYSIS_SUMMARY.txt, QUICK_REFERENCE_IMPLEMENTATION.txt, FASTFOTO_ANALYSIS_SUMMARY.txt, or comprehensive reports. Use slash commands exclusively."
 ```
 
 ---
@@ -97,19 +97,18 @@ For complete FastFoto processing, use this **exact phrase**:
 
 **TASK TOOL AGENTS: Use orchestrator.py and batch scripts ONLY. Let scripts create their designed outputs. Creating custom automation or Read tool scripts violates constraints!**
 
-## ✅ **ALWAYS DO THIS - USE EXISTING SCRIPTS:**
+## ✅ **ALWAYS DO THIS - USE SLASH COMMANDS:**
 
-- ✅ **Use orchestrator.py exclusively** for back scan OCR processing
-- ✅ **Use batch orientation scripts** for orientation analysis (batch_orientation_analysis.py)
-- ✅ **Run documented commands only** - no custom automation
-- ✅ **Process entire collection** with existing scripts - complete workflow coverage
-- ✅ **Let scripts handle batching** - orchestrator manages Read tool internally
-- ✅ **Generate outputs per script design** - proposal files, analysis results
-- ✅ **Trust tested workflows** - scripts handle Read tool integration properly
-- ✅ **Use established patterns** - documented scripts only
-- ✅ **Follow script outputs** - proposal files, not custom JSON
+- ✅ **Use /fastfoto exclusively** for back scan OCR processing
+- ✅ **Use /fastfoto-orientation** for orientation analysis with Read tool
+- ✅ **Process files individually** with Read tool - no batch automation
+- ✅ **Extract verbatim text only** - no comprehensive reports or summaries
+- ✅ **Use Read tool directly** - no scripts or simulation data
+- ✅ **Generate individual EXIF updates** - no proposal files
+- ✅ **Trust Read tool analysis** - real visual content analysis only
+- ✅ **Use slash commands exclusively** - documented workflows only
 
-**TASK TOOL AGENTS: Use orchestrator.py and batch scripts ONLY - they handle Read tool integration correctly!**
+**TASK TOOL AGENTS: Use slash commands ONLY - they handle Read tool integration correctly!**
 
 ---
 

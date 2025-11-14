@@ -33,7 +33,11 @@
       "Bash(magick:*)",
       "Bash(python src/preprocess_images.py:*)",
       "Bash(exiftool:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(find /tmp/fastfoto_prepared:*)",
+      "Bash(ls /tmp/fastfoto_prepared:*)",
+      "Bash(head:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []
