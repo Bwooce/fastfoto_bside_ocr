@@ -13,14 +13,20 @@ def main():
         tool_input = input_data.get("tool_input", {})
         command = tool_input.get("command", "")
 
+        # Allow git operations with heredoc (legitimate use case)
+        if re.match(r"^git\s+", command) and "<<" in command:
+            sys.exit(0)
+
         # Block script creation via heredoc or file redirection
         forbidden_patterns = [
             r"cat\s*>\s*.*\.py",          # cat > script.py
             r"cat\s*>\s*.*\.sh",          # cat > script.sh
             r"echo.*>\s*.*\.py",          # echo "code" > script.py
             r"echo.*>\s*.*\.sh",          # echo "code" > script.sh
-            r".*<<\s*['\"]?EOF['\"]?",    # heredoc creation
-            r".*<<\s*['\"]?END['\"]?",    # heredoc creation
+            r"cat\s*<<.*>\s*.*\.py",      # heredoc to script.py
+            r"cat\s*<<.*>\s*.*\.sh",      # heredoc to script.sh
+            r".*<<.*>\s*.*\.py",          # any heredoc to .py file
+            r".*<<.*>\s*.*\.sh",          # any heredoc to .sh file
             r"python3?\s+-c.*subprocess", # subprocess automation
             r"python3?\s+-c.*os\.system", # system call automation
             r"find.*-exec",               # find with exec (automation)
@@ -45,7 +51,7 @@ def main():
                 deny_with_reason(f"Automation command blocked - FastFoto workflow uses Read tool exclusively: {cmd}")
                 return
 
-        # Allow specific commands for FastFoto preparation
+        # Allow specific commands for FastFoto preparation and analysis
         allowed_patterns = [
             r"^mkdir\s+",                 # Directory creation
             r"^magick\s+",                # ImageMagick processing
@@ -58,14 +64,43 @@ def main():
             r"^head\s+",                  # File preview
             r"^tail\s+",                  # File preview
             r"^echo\s+[^>]*$",           # Echo without redirection
+            r"^find\s+",                  # File finding
+            r"^wc\s+",                    # Word/line counting
+            r"^sort\s+",                  # Sorting
+            r"^uniq\s+",                  # Uniqueness
         ]
 
-        # If command doesn't match allowed patterns, check if it's safe
-        if not any(re.match(pattern, command) for pattern in allowed_patterns):
-            # Block complex commands that could be automation
-            if any(char in command for char in ["|", "&&", ";", "`", "$("]):
-                deny_with_reason(f"Complex bash operation blocked - FastFoto workflow uses simple commands only")
+        # Allow simple piped operations for data processing
+        if "|" in command and not any(danger in command for danger in ["&&", ";", "`", "$("]):
+            # Check if it's a safe pipe operation (file processing)
+            safe_pipe_patterns = [
+                r"find.*\|\s*wc",         # find | wc (counting)
+                r"ls.*\|\s*grep",         # ls | grep (filtering)
+                r"grep.*\|\s*head",       # grep | head (limiting)
+                r"cat.*\|\s*grep",        # cat | grep (searching)
+                r".*\|\s*sort",           # anything | sort
+                r".*\|\s*uniq",           # anything | uniq
+            ]
+
+            if any(re.search(pattern, command) for pattern in safe_pipe_patterns):
+                sys.exit(0)  # Allow safe pipe operations
+
+        # Check for specific dangerous patterns instead of blanket blocking
+        dangerous_command_patterns = [
+            r";\s*(rm|del|format)",       # Semicolon followed by destructive commands
+            r"&&.*rm",                    # Command chaining with rm
+            r"&&.*del",                   # Command chaining with del
+            r"`.*rm",                     # Command substitution with rm
+            r"\$\(.*rm",                  # Command substitution with rm
+        ]
+
+        for dangerous in dangerous_command_patterns:
+            if re.search(dangerous, command, re.IGNORECASE):
+                deny_with_reason(f"Dangerous command pattern blocked: {dangerous}")
                 return
+
+        # Allow normal bash constructs like for loops, while loops, etc.
+        # Focus only on preventing script creation (already covered) and subprocess automation (already covered)
 
         # If we reach here, the command is allowed
         sys.exit(0)
