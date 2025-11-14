@@ -74,6 +74,8 @@ After each transcription, ask yourself:
 - **NO bulk processing sections** - no "apply to remaining files" commands
 - **NO comprehensive statistics** - no collection-wide summaries
 - **NO pattern-based automation** - no "files matching pattern X get treatment Y"
+- **NO marker file creation** - no .done, .processed, .complete, or tracking files
+- **NO batch automation systems** - process each file individually without infrastructure
 
 ## **CRITICAL OCR INSTRUCTIONS**
 
@@ -159,6 +161,9 @@ After each transcription, ask yourself:
 - **NO bulk GPS coordinate assignment** - coordinates only for individually verified locations
 - **NO bulk date standardization** - dates only from individual file analysis
 - **NO "remaining files processed using patterns"** - every file requires individual Read tool analysis
+- **NEVER create marker files** - no progress tracking files (.done, .processed, .complete, etc.)
+- **NO batch tracking systems** - no automation infrastructure for file processing
+- **NO progress tracking automation** - process files individually without tracking systems
 
 **GEOGRAPHIC DATA RULES:**
 - **NEVER invent location names** - only use locations clearly visible in handwriting

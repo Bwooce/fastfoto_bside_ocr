@@ -59,9 +59,14 @@ def main():
                     deny_with_reason(f"Custom txt file creation blocked - Use proposal file format or Read tool directly: {os.path.basename(file_path)}")
                     return
 
+            # Block marker files specifically
+            elif any(marker in file_path.lower() for marker in ['.done', '.processed', '.complete', '.marker', '.tracking', '.progress']):
+                deny_with_reason(f"Marker file creation blocked - No automation tracking systems allowed: {os.path.basename(file_path)}")
+                return
+
             # Block all other file creation in /tmp/ except image files for preparation
             elif not file_path.endswith(".jpg"):
-                deny_with_reason(f"Custom file creation blocked in /tmp/ - Use Read tool directly: {os.path.basename(file_path)}")
+                deny_with_reason(f"Custom file creation blocked in /tmp/ - Use Read tool directly, no automation infrastructure: {os.path.basename(file_path)}")
                 return
 
         # If we reach here, the file write is allowed
