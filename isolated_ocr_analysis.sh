@@ -30,10 +30,15 @@ find "$PREPARED_DIR" -name "*_b.jpg" | sort | while read -r filepath; do
 
     echo "[$CURRENT/$TOTAL_FILES] Processing: $filename" | tee -a "$LOG_FILE"
 
-    # Skip if already processed
+    # Check if already processed successfully (retry session limit errors)
     if [ -f "$output_file" ]; then
-        echo "  -> Already exists, skipping" | tee -a "$LOG_FILE"
-        continue
+        if grep -q "Session limit reached\|rate limit exceeded\|quota exceeded\|token limit\|insufficient credits\|billing error" "$output_file"; then
+            echo "  -> Found session/token error, retrying..." | tee -a "$LOG_FILE"
+            rm "$output_file"  # Remove failed file to retry
+        else
+            echo "  -> Already exists, skipping" | tee -a "$LOG_FILE"
+            continue
+        fi
     fi
 
     # Create optimized extraction prompt with anti-hallucination rules
@@ -97,8 +102,8 @@ GPS:GPSLongitudeRef: [E/W hemisphere]"
         2>&1)
     claude_exit_code=$?
 
-    # Check for token/rate limiting errors
-    if [[ $claude_exit_code -ne 0 ]] || echo "$claude_output" | grep -iq "rate limit\|quota\|token\|insufficient\|billing"; then
+    # Check for token/rate limiting errors (more specific patterns to avoid false positives)
+    if [[ $claude_exit_code -ne 0 ]] || echo "$claude_output" | grep -iq "rate limit exceeded\|quota exceeded\|token limit\|insufficient credits\|billing error\|session limit reached"; then
         echo "  -> CRITICAL: Token/rate limit detected!" | tee -a "$LOG_FILE"
         echo "Claude output: $claude_output" | tee -a "$LOG_FILE"
         echo ""
@@ -109,7 +114,11 @@ GPS:GPSLongitudeRef: [E/W hemisphere]"
         echo "To resume: Fix token/billing issue and restart script" | tee -a "$LOG_FILE"
         echo "Partial results available in: $OUTPUT_DIR" | tee -a "$LOG_FILE"
         exit 1
-    elif echo "$claude_output" | grep -q "ERROR\|Analysis completed"; then
+    elif echo "$claude_output" | grep -q "ERROR"; then
+        echo "  -> ERROR: Analysis failed for $filename" | tee -a "$LOG_FILE"
+        echo "ERROR: Failed to analyze $filename at $(date)" >> "$output_file"
+        echo "Claude output: $claude_output" >> "$output_file"
+    elif echo "$claude_output" | grep -q "FILENAME:\|TRANSCRIPTION:\|EXIF_MAPPINGS:"; then
         echo "$claude_output" > "$output_file"
         echo "  -> Analysis completed: $output_file" | tee -a "$LOG_FILE"
     else
@@ -126,7 +135,7 @@ GPS:GPSLongitudeRef: [E/W hemisphere]"
 
         # Quick token test with small request
         test_output=$(echo "test" | claude -p --model sonnet --settings '{"permissions":{"defaultMode":"bypassPermissions"}}' 2>&1)
-        if echo "$test_output" | grep -iq "rate limit\|quota\|token\|insufficient\|billing"; then
+        if echo "$test_output" | grep -iq "rate limit exceeded\|quota exceeded\|token limit\|insufficient credits\|billing error\|session limit reached"; then
             echo "🚨 PROCESSING PAUSED AT CHECKPOINT 🚨" | tee -a "$LOG_FILE"
             echo "Reason: Token/billing issue detected at checkpoint" | tee -a "$LOG_FILE"
             echo "Progress: $CURRENT/$TOTAL_FILES files processed" | tee -a "$LOG_FILE"

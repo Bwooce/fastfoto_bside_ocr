@@ -83,11 +83,17 @@ Processing 398 analysis files typically yields:
 
 **Provide your source directory path to begin applying extracted metadata to all 398 analyzed photos.**
 
-## Execution
+**Runs the FastFoto EXIF application script to process all analysis files and apply metadata to original photos.**
 
-Use Task tool with model=haiku to process all 398 analysis files:
+Execute: `python apply_fastfoto_exif.py [source_directory]`
+
+This script will:
+- Process all successful analysis files from `/tmp/isolated_analysis/`
 - Extract EXIF mappings from each markdown analysis file
-- Apply exiftool commands with proper field mapping
-- Handle GPS coordinates and date formatting
-- Organize processed back scan files
-- Generate processing report with statistics
+- Find corresponding original photos in the source directory
+- Apply comprehensive EXIF metadata using exiftool
+- Move processed back scan files to `processed/` subdirectory
+- Generate detailed statistics and processing summary
+- Continue processing even if individual files fail
+
+The script handles all 362+ successful analysis files automatically and provides a comprehensive report of successes, failures, and file organization.

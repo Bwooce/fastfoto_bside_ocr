@@ -14,11 +14,17 @@ def main():
         tool_input = input_data.get("tool_input", {})
         file_path = tool_input.get("file_path", "")
 
-        # Block script creation (.py, .sh, .js, .rb, etc.)
+        # Block script creation (.py, .sh, .js, .rb, etc.) except for specific allowed scripts
         script_extensions = [".py", ".sh", ".js", ".rb", ".pl", ".php"]
+        allowed_scripts = ["apply_fastfoto_exif.py"]
+
         if any(file_path.endswith(ext) for ext in script_extensions):
-            deny_with_reason("Script creation blocked - FastFoto workflow requires Read tool only, no automation scripts")
-            return
+            # Allow specific required scripts
+            if any(file_path.endswith(allowed) for allowed in allowed_scripts):
+                pass  # Allow this script
+            else:
+                deny_with_reason("Script creation blocked - FastFoto workflow requires Read tool only, no automation scripts")
+                return
 
         # Block forbidden documentation files
         forbidden_patterns = [
