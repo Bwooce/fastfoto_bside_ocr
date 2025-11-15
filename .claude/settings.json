@@ -87,7 +87,11 @@
       "Bash(rm -rf:*)",
       "Bash(mv:*)",
       "Bash(cp:*)",
-      "Bash(./isolated_ocr_analysis.sh:*)"
+      "Bash(./isolated_ocr_analysis.sh:*)",
+      "SlashCommand(/fastfoto-apply:*)",
+      "SlashCommand(/fastfoto-analyze:*)",
+      "Read(/Users/bruce/Pictures/2025_PeruScanning/**)",
+      "Read(/Users/bruce/Pictures/**)"
     ],
     "deny": [],
     "ask": []
