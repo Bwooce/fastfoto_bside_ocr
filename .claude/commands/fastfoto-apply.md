@@ -6,69 +6,88 @@ Apply extracted handwritten metadata to original photo files using exiftool with
 
 ## Prerequisites
 
-You must have completed `/fastfoto-analyze [source_directory]` first. This command reads the analysis results from `/tmp/isolated_analysis/` and applies the extracted metadata to your original photo files.
+You must have completed `/fastfoto-analyze [source_directory]` first. This command reads the analysis results from `/tmp/isolated_analysis/` (398 analysis files) and applies the extracted metadata to your original photo files.
+
+## What This Does
+
+1. **Reads all 398 analysis files** from `/tmp/isolated_analysis/`
+2. **Extracts EXIF mappings** from each markdown analysis file
+3. **Maps back scan files** to original photo files in source directory
+4. **Applies comprehensive EXIF metadata** to each original photo using exiftool
+5. **Handles GPS coordinates, dates, and transcriptions** properly
+6. **Automatically organizes processed files** - moves `_b.jpg` files to `processed/` subdirectory
+7. **Generates comprehensive report** showing successes, failures, and statistics
 
 ## Enhanced EXIF Fields Applied (2024 Standards)
 
-For each analyzed back scan, applies comprehensive metadata to the corresponding original photo:
+For each analyzed back scan, applies metadata to the corresponding original photo:
 
 ### **Core EXIF Fields:**
 - **Caption-Abstract**: Verbatim handwritten text
 - **UserComment**: Language-tagged verbatim transcription
-- **ImageDescription**: Brief event/location context when clear
-- **DateTimeOriginal**: EXIF format (YYYY:MM:DD HH:MM:SS) with time when available
-- **ProcessingSoftware**: APS codes and lab processing data
-- **ImageUniqueID**: APS roll+frame combination for true uniqueness per photo
+- **ImageDescription**: Brief event/location context
+- **DateTimeOriginal**: ISO format (YYYY:MM:DD HH:MM:SS)
+- **Software**: APS codes and processing data
+- **ImageUniqueID**: Unique identifier from analysis
 
 ### **Apple Photos Compatibility:**
-- **IPTC:ObjectName**: Handwritten text for Apple Photos title field
+- **IPTC:ObjectName**: Handwritten text for Apple Photos title
 - **IPTC:Keywords**: Semicolon-separated (dates;names;locations;events)
 
 ### **Cross-Platform Compatibility:**
-- **XMP:Description**: Event/location context for broad application support
-- **GPS coordinates**: Decimal degrees with hemisphere references
-- **Orientation corrections**: Rotation metadata when needed
+- **XMP:Description**: Event/location context
+- **GPS:GPSLatitude/Longitude**: Coordinates with hemisphere refs
+- **GPS:GPSLatitudeRef/LongitudeRef**: Direction references (N/S, E/W)
 
-### **Example Commands Generated:**
-```bash
-# Enhanced metadata application for maximum compatibility
-exiftool -Caption-Abstract="Hotel [uncertain: name?] March [uncertain: 1984?]" \
-         -UserComment="Spanish handwritten text: Hotel [uncertain: name?] March [uncertain: 1984?]" \
-         -ImageDescription="Hotel visit March 1984" \
-         -IPTC:ObjectName="Hotel [uncertain: name?] March [uncertain: 1984?]" \
-         -IPTC:Keywords="hotel;March;1984;travel" \
-         -XMP:Description="Hotel visit March 1984" \
-         -DateTimeOriginal="1984:03:01 00:00:00" \
-         -ProcessingSoftware="APS ID123-456 <5>" \
-         -ImageUniqueID="ID123-456-05" \
-         -GPS:GPSLatitude="40.7128" \
-         -GPS:GPSLongitude="-74.0060" \
-         -GPS:GPSLatitudeRef="N" \
-         -GPS:GPSLongitudeRef="W" \
-         [original_photo.jpg]
-```
+## Process Flow
 
-## Process
-
-1. **Reads analysis results** from `/tmp/isolated_analysis/`
-2. **Maps back scan files** to original photo files
-3. **Generates enhanced exiftool commands** with cross-platform compatibility
-4. **Applies comprehensive EXIF metadata** for optimal photo management
-5. **Handles orientation corrections** and time zone considerations
+The Task tool will:
+1. Process each of the 398 analysis files sequentially
+2. For each analysis file:
+   - Extract filename and EXIF mappings from analysis text
+   - Find corresponding original photo in source directory
+   - Skip if original photo not found (continues processing)
+   - Apply extracted EXIF fields using exiftool
+   - Attempt to move processed back scan to `processed/` subdirectory
+3. Generate detailed report with:
+   - Total files processed
+   - Successful applications
+   - Failed applications
+   - Skipped files (with reasons)
+   - Back scans moved to processed/
+   - Success rate percentage
 
 ## Safety Features
 
-- **Automatic backup** of original files (exiftool creates .jpg_original files)
-- **File mapping validation** ensures correct metadata application
-- **Existing EXIF preservation** while adding extracted metadata
-- **Processing status reports** for each photo with error handling
-- **Dry-run option** to preview commands before execution
+- **Continues on missing back scans** - file moves are optional, processing never stops
+- **Exiftool auto-backup** - creates .jpg_original backup files
+- **Validation** ensures filename mapping correctness
+- **Error handling** - processes all 398 files even if some fail
+- **Comprehensive reporting** - detailed statistics and sample results
 
-## Compatibility Benefits
+## File Organization
 
-- **Apple Photos**: Recognizes IPTC keywords and ObjectName titles
-- **Google Photos**: Reads GPS coordinates and DateTimeOriginal
-- **Adobe Applications**: Full XMP compatibility
-- **Professional workflows**: Complete IPTC standard compliance
+After applying EXIF metadata:
+- **Original photos** remain in source directory with enhanced metadata
+- **Successfully processed back scans** moved to `[source_directory]/processed/`
+- **Failed back scans** stay in original location for manual review
+- **Analysis files** remain in `/tmp/isolated_analysis/` for reference
 
-**Provide your source directory path to begin applying extracted metadata to your photos.**
+## Expected Results
+
+Processing 398 analysis files typically yields:
+- 300+ original photos with successfully applied EXIF metadata
+- Back scans organized to processed/ subdirectory
+- Comprehensive statistics showing success rate
+- Detailed report of any failures or skipped files
+
+**Provide your source directory path to begin applying extracted metadata to all 398 analyzed photos.**
+
+## Execution
+
+Use Task tool with model=haiku to process all 398 analysis files:
+- Extract EXIF mappings from each markdown analysis file
+- Apply exiftool commands with proper field mapping
+- Handle GPS coordinates and date formatting
+- Organize processed back scan files
+- Generate processing report with statistics
