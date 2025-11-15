@@ -179,8 +179,12 @@ def main():
             with open(analysis_file, 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            # Skip files with errors
-            if 'ERROR:' in content or 'Session limit reached' in content:
+            # Skip files with critical errors (but allow files with ERROR headers that still contain valid data)
+            if 'Session limit reached' in content:
+                continue
+
+            # Check for fatal errors that prevent analysis
+            if 'ERROR:' in content and not ('EXIF_MAPPINGS:' in content or '**EXIF_MAPPINGS:**' in content or '## EXIF_MAPPINGS:' in content):
                 continue
 
             # Must have EXIF_MAPPINGS section (handle all formats: ##, **, and plain)
