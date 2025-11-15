@@ -75,6 +75,30 @@ def extract_exif_mappings(analysis_content):
             if value and not is_pollution:
                 mappings[key] = value
 
+    # Post-process mappings to ensure Caption-Abstract gets verbatim text from UserComment
+    if 'UserComment' in mappings and mappings['UserComment']:
+        usercomment = mappings['UserComment']
+
+        # Extract verbatim text by removing language prefixes like "English handwritten text: "
+        verbatim_match = re.search(r'^[A-Za-z]+ handwritten text: (.+)$', usercomment)
+        if verbatim_match:
+            verbatim_text = verbatim_match.group(1).strip()
+
+            # Replace Caption-Abstract with verbatim text if it contains generic descriptions
+            if 'Caption-Abstract' in mappings:
+                current_caption = mappings['Caption-Abstract'].lower()
+                generic_patterns = [
+                    'mixed handwritten', 'handwritten content', 'multiple elements',
+                    'various text', 'different text', 'text and writing', 'several elements'
+                ]
+
+                # Replace with verbatim text if current caption contains generic descriptions
+                if any(pattern in current_caption for pattern in generic_patterns):
+                    mappings['Caption-Abstract'] = verbatim_text
+            else:
+                # If no Caption-Abstract exists, set it to the verbatim text
+                mappings['Caption-Abstract'] = verbatim_text
+
     return mappings
 
 def find_original_photo(back_scan_filename, source_dir):
