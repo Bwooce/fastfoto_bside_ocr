@@ -56,7 +56,8 @@ def main():
             r"^mkdir\s+",                 # Directory creation
             r"^magick\s+",                # ImageMagick processing
             r"^python\s+src/preprocess_images\.py",  # Image preparation (only working script)
-            r"^ls\s+",                    # File listing
+            r"^ls\s*",                    # File listing (allow with no args)
+            r"^pwd\s*$",                  # Print working directory
             r"^chmod\s+",                 # Permission changes
             r"^git\s+",                   # Git operations
             r"^grep\s+",                  # Text search
@@ -69,7 +70,16 @@ def main():
             r"^sort\s+",                  # Sorting
             r"^uniq\s+",                  # Uniqueness
             r"^exiftool\s+",              # EXIF metadata operations
+            r"^mv\s+",                    # File moves/renames
+            r"^cp\s+",                    # File copies
+            r"^\.\/isolated_ocr_analysis\.sh", # Allow isolation script
+            r"^claude\s+",                # Claude CLI
         ]
+
+        # Check if command matches allowed patterns first
+        for pattern in allowed_patterns:
+            if re.search(pattern, command, re.IGNORECASE):
+                sys.exit(0)  # Allow explicitly permitted commands
 
         # Allow simple piped operations for data processing
         if "|" in command and not any(danger in command for danger in ["&&", ";", "`", "$("]):
