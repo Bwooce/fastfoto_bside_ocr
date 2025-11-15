@@ -84,20 +84,58 @@ GPS:GPSLongitude: [decimal degrees if location identified]
 GPS:GPSLatitudeRef: [N/S hemisphere]
 GPS:GPSLongitudeRef: [E/W hemisphere]"
 
-    # Run optimized Claude CLI analysis
+    # Run optimized Claude CLI analysis with error monitoring
     echo "  -> Launching optimized Claude CLI analysis..." | tee -a "$LOG_FILE"
 
-    if echo "$prompt_text" | claude -p \
+    # Capture both stdout and stderr for error detection
+    claude_output=$(echo "$prompt_text" | claude -p \
         --model sonnet \
         --tools "Read" \
         --add-dir /tmp/fastfoto_prepared \
         --system-prompt "Extract data from single photo only." \
         --settings '{"permissions":{"defaultMode":"bypassPermissions"}}' \
-        > "$output_file" 2>/dev/null; then
+        2>&1)
+    claude_exit_code=$?
+
+    # Check for token/rate limiting errors
+    if [[ $claude_exit_code -ne 0 ]] || echo "$claude_output" | grep -iq "rate limit\|quota\|token\|insufficient\|billing"; then
+        echo "  -> CRITICAL: Token/rate limit detected!" | tee -a "$LOG_FILE"
+        echo "Claude output: $claude_output" | tee -a "$LOG_FILE"
+        echo ""
+        echo "🚨 PROCESSING PAUSED 🚨" | tee -a "$LOG_FILE"
+        echo "Reason: Token limit, rate limit, or billing issue detected" | tee -a "$LOG_FILE"
+        echo "Current file: $filename" | tee -a "$LOG_FILE"
+        echo "Progress: $CURRENT/$TOTAL_FILES files processed" | tee -a "$LOG_FILE"
+        echo "To resume: Fix token/billing issue and restart script" | tee -a "$LOG_FILE"
+        echo "Partial results available in: $OUTPUT_DIR" | tee -a "$LOG_FILE"
+        exit 1
+    elif echo "$claude_output" | grep -q "ERROR\|Analysis completed"; then
+        echo "$claude_output" > "$output_file"
         echo "  -> Analysis completed: $output_file" | tee -a "$LOG_FILE"
     else
         echo "  -> ERROR: Analysis failed for $filename" | tee -a "$LOG_FILE"
         echo "ERROR: Failed to analyze $filename at $(date)" >> "$output_file"
+        echo "Claude output: $claude_output" >> "$output_file"
+    fi
+
+    # Periodic token monitoring checkpoint
+    if (( CURRENT % 50 == 0 )); then
+        echo ""
+        echo "=== CHECKPOINT: $CURRENT files processed ===" | tee -a "$LOG_FILE"
+        echo "Checking system health..." | tee -a "$LOG_FILE"
+
+        # Quick token test with small request
+        test_output=$(echo "test" | claude -p --model sonnet --settings '{"permissions":{"defaultMode":"bypassPermissions"}}' 2>&1)
+        if echo "$test_output" | grep -iq "rate limit\|quota\|token\|insufficient\|billing"; then
+            echo "🚨 PROCESSING PAUSED AT CHECKPOINT 🚨" | tee -a "$LOG_FILE"
+            echo "Reason: Token/billing issue detected at checkpoint" | tee -a "$LOG_FILE"
+            echo "Progress: $CURRENT/$TOTAL_FILES files processed" | tee -a "$LOG_FILE"
+            echo "Partial results available in: $OUTPUT_DIR" | tee -a "$LOG_FILE"
+            exit 1
+        else
+            echo "✅ System health OK, continuing..." | tee -a "$LOG_FILE"
+        fi
+        echo ""
     fi
 
     # Brief pause to avoid overwhelming the system
