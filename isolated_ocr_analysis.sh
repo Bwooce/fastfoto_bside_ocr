@@ -40,18 +40,17 @@ find "$PREPARED_DIR" -name "*_b.jpg" | sort | while read -r filepath; do
     prompt_text="Use Read tool to analyze $filepath.
 
 EXTRACT (VERBATIM ONLY):
-1. ORIENTATION: Is text readable or rotated? (correct/90°/180°/270°)
-2. TRANSCRIPTION: Exact text as written - mark uncertain as [uncertain: word?]
-3. APS DATA: YY-MON-D HH:MMAM/PM, ID###-###, <##>, equipment codes
-4. DATES: Extract in priority order (first found wins):
+1. TRANSCRIPTION: Exact text as written - mark uncertain as [uncertain: word?]
+2. APS DATA: YY-MON-D HH:MMAM/PM, ID###-###, <##>, equipment codes
+3. DATES: Extract in priority order (first found wins):
    - Priority 1: Handwritten dates from comments (personal notes)
    - Priority 2: Machine/APS processing timestamps (lab data)
    - Priority 3: Date patterns in filename (last resort)
    - Format as YYYY:MM:DD HH:MM:SS (use Jan 1 if only year available)
    - Assume DD/MM/YY format for ambiguous dates
    - Include time component if available from APS timestamps
-5. LOCATIONS: Only if clearly written - NO GUESSING
-6. GPS: Only for definitively identifiable places - NO GEOGRAPHIC GUESSING
+4. LOCATIONS: Only if clearly written - NO GUESSING
+5. GPS: Only for definitively identifiable places - NO GEOGRAPHIC GUESSING
 
 CRITICAL RULES:
 - NO pattern building from other photos
@@ -62,7 +61,6 @@ CRITICAL RULES:
 
 OUTPUT:
 FILENAME: $filename
-ORIENTATION: [correct/rotate needed]
 TRANSCRIPTION: [verbatim text with uncertainty markers]
 LANGUAGE: [Spanish/English/Dutch/German]
 APS_DATA: [specific codes or None visible]

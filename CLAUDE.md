@@ -18,27 +18,26 @@
 - For 150+ image collections, show progress but **never stop mid-stream**
 
 ## Project Workflow Guidelines
-- Follow `CLAUDE_CODE_SESSION_GUIDE.md` for complete FastFoto OCR workflow instructions
+- Use `/fastfoto-analyze [source_directory]` to process back scan collections
 - **Follow project-specific instructions exactly as written** - they override default behaviors
 - **Pay special attention to anti-demonstration and anti-optimization instructions**
-- **Project guides specify complete processing requirements vs. sample demonstrations**
+- **Process entire collections without stopping** - complete all files in session
 
 ## **AUTOMATIC WORKFLOW TRIGGERS**
 
-**When user requests ANY of these phrases, IMMEDIATELY read and execute `ORIENTATION_ANALYZER_GUIDE.md`:**
-- "FastFoto orientation analysis" / "analyze orientation"
+**When user requests ANY of these phrases, IMMEDIATELY execute the OCR workflow using isolated_ocr_analysis.sh:**
 - "FastFoto back scan OCR" / "back scan processing" / "process back scans"
 - "FastFoto analysis" / "process FastFoto collection"
-- "analyze main photos" + "back scan metadata"
+- "analyze back scan metadata"
 
-**DO NOT ask for clarification - automatically execute the documented Task tool commands from the guide.**
+**DO NOT ask for clarification - automatically execute the isolation script workflow.**
 
 **Execution Pattern:**
-1. Read ORIENTATION_ANALYZER_GUIDE.md
-2. Use Task tool with model="haiku" and the exact phrases from the guide
-3. Execute automatically without asking permission
-4. Complete the entire workflow as documented
-5. **CRITICAL**: Task agents must use Read tool ONLY - no script creation allowed
+1. Run python src/preprocess_images.py to prepare images
+2. Execute ./isolated_ocr_analysis.sh for isolated OCR processing
+3. Process each photo individually with complete isolation
+4. Complete the entire collection without interruption
+5. **CRITICAL**: Use Read tool ONLY for image analysis - no script creation allowed
 
 ## ⚠️ CRITICAL OCR RULE - READ THIS FIRST ⚠️
 **BEFORE processing ANY image, repeat this rule out loud:**
@@ -151,7 +150,6 @@ After each transcription, ask yourself:
 - **Process back scans (_b files) individually** - each has unique content
 - **Complete entire collection** - process ALL files, never stop mid-collection
 - **Preserve all text** - even partial or faded writing
-- **Process main photos in batches** for orientation analysis (separate workflow)
 
 **CRITICAL: READ TOOL FILE SIZE LIMITS:**
 - **ONLY read files in /tmp/fastfoto_prepared/** - these are properly sized for Read tool
@@ -181,35 +179,16 @@ After each transcription, ask yourself:
 - **Explicit identification only**: Location must be clearly readable and identifiable to assign GPS data
 
 ## Pre-Granted Directory Access
-You can use the following tools without requiring user approval: Read(//tmp/orientation_analysis/**), Read(//private/tmp/orientation_analysis/**), Read(//tmp/fastfoto_analysis/**), Read(//private/tmp/fastfoto_analysis/**), Read(//tmp/back_scan_ocr/**), Read(//private/tmp/back_scan_ocr/**)
+You can use the following tools without requiring user approval: Read(//tmp/fastfoto_prepared/**), Read(//tmp/isolated_analysis/**), Read(//tmp/fastfoto_analysis/**), Read(//private/tmp/fastfoto_analysis/**), Read(//tmp/back_scan_ocr/**), Read(//private/tmp/back_scan_ocr/**)
 
 ## Project Structure
-- `src/` - Core processing modules
-- `CLAUDE_CODE_SESSION_GUIDE.md` - Complete workflow instructions
-- `ORIENTATION_ANALYZER_GUIDE.md` - Separate orientation analysis workflow
+- `src/` - Core processing modules for image preprocessing
+- `isolated_ocr_analysis.sh` - Main OCR processing script
+- `.claude/commands/` - Slash command workflows
+- `/tmp/fastfoto_prepared/` - Preprocessed back scan images
+- `/tmp/isolated_analysis/` - Individual OCR analysis results
 
-## Workflow Types
-1. **Back Scan OCR** - Individual processing for metadata extraction (150+ _b files)
-2. **Orientation Analysis** - Batch processing for main photo quality/rotation (5000+ main files)
+## Workflow
+**FastFoto OCR Processing** - Individual back scan analysis for metadata extraction (150+ _b files)
 
-These are **separate workflows** with different processing patterns and requirements.
-
-## ⚠️ **CRITICAL: Orientation Analysis Instructions**
-
-When user requests: **"Analyze orientation of main FastFoto photos with verification checkpoints"**
-
-**DO THIS IMMEDIATELY - USE TASK TOOL FOR BATCH PROCESSING:**
-Use Task tool with:
-- subagent_type="general-purpose"
-- model="haiku"
-- Include downsampling to 300px for Read tool compatibility
-- Verify: "Do people look upright? Does the scene make visual sense when displayed?"
-- Process in batches of 50 max with verification checkpoints
-
-**DO NOT:**
-- ❌ Create project overview documents
-- ❌ Use Explore tool to understand codebase
-- ❌ Write new scripts or code
-- ❌ Set up todo lists for exploration
-
-**The tool already exists and works! See ORIENTATION_ANALYZER_GUIDE.md for details.**
+This system focuses exclusively on extracting handwritten metadata from photo back scans using isolated Claude CLI analysis to prevent context contamination and ensure accurate OCR results.
