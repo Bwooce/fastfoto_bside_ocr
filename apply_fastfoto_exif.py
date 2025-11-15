@@ -16,12 +16,15 @@ def extract_exif_mappings(analysis_content):
     mappings = {}
 
     # Find EXIF_MAPPINGS section (handle both markdown and plain formats)
-    exif_section_match = re.search(r'\*\*EXIF_MAPPINGS:\*\*\s*\n(.*?)(?=\n\n|\Z)', analysis_content, re.DOTALL)
+    exif_section_match = re.search(r'\*\*EXIF_MAPPINGS:\*\*\s*\n\n(.*?)(?=\n---|\Z)', analysis_content, re.DOTALL)
     if not exif_section_match:
-        # Try plain format fallback
-        exif_section_match = re.search(r'EXIF_MAPPINGS:\s*\n(.*?)(?=\n\n|\Z)', analysis_content, re.DOTALL)
+        # Try ## markdown format (used in newer analysis files)
+        exif_section_match = re.search(r'## EXIF_MAPPINGS:\s*\n\n(.*?)(?=\n---|\Z)', analysis_content, re.DOTALL)
         if not exif_section_match:
-            return mappings
+            # Try plain format fallback
+            exif_section_match = re.search(r'EXIF_MAPPINGS:\s*\n(.*?)(?=\n\n|\Z)', analysis_content, re.DOTALL)
+            if not exif_section_match:
+                return mappings
 
     exif_content = exif_section_match.group(1)
 
@@ -29,8 +32,8 @@ def extract_exif_mappings(analysis_content):
     for line in exif_content.split('\n'):
         line = line.strip()
 
-        # Skip notes and comments
-        if line.startswith('*') or line.startswith('(Note:'):
+        # Skip notes and comments (but not markdown EXIF fields)
+        if line.startswith('(Note:') or (line.startswith('*') and not line.startswith('**') and ':**' not in line):
             continue
 
         if ':' in line and not line.startswith('#'):
@@ -45,8 +48,31 @@ def extract_exif_mappings(analysis_content):
 
             value = value.strip().strip('[]')
 
-            # Skip empty values or "None" values
-            if value and value.lower() not in ['none', 'none visible', 'none generated']:
+            # Skip empty values, "None" values, and pollution patterns
+            pollution_patterns = [
+                'none', 'none visible', 'none generated', 'none available',
+                'blank', 'blank - no text visible', 'blank - no handwritten text present',
+                'blank - no context available', 'blank - no aps codes clearly readable',
+                'blank - no aps data', 'blank - no aps data visible',
+                'no text', 'not visible', 'not available', 'no handwritten content visible'
+            ]
+
+            # Check if value contains pollution patterns
+            is_pollution = False
+            if value:
+                value_lower = value.lower().strip()
+
+                # Exact match check for short pollution patterns
+                if value_lower in pollution_patterns:
+                    is_pollution = True
+
+                # Pattern match for longer pollution descriptions
+                elif (value_lower.startswith(('blank', 'none', 'no text', 'not visible', 'not available')) or
+                      'no handwritten' in value_lower or 'no aps' in value_lower):
+                    is_pollution = True
+
+            # Only add non-polluted values
+            if value and not is_pollution:
                 mappings[key] = value
 
     return mappings
@@ -157,8 +183,8 @@ def main():
             if 'ERROR:' in content or 'Session limit reached' in content:
                 continue
 
-            # Must have EXIF_MAPPINGS section (handle both markdown and plain formats)
-            if 'EXIF_MAPPINGS:' in content or '**EXIF_MAPPINGS:**' in content:
+            # Must have EXIF_MAPPINGS section (handle all formats: ##, **, and plain)
+            if 'EXIF_MAPPINGS:' in content or '**EXIF_MAPPINGS:**' in content or '## EXIF_MAPPINGS:' in content:
                 successful_files.append(analysis_file)
         except Exception:
             continue
