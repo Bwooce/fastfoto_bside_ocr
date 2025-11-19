@@ -107,17 +107,22 @@ The Task tool will:
 
 After applying EXIF metadata:
 - **Original photos** remain in source directory with enhanced metadata
-- **Successfully processed back scans** moved to `[source_directory]/processed/`
-- **Failed back scans** stay in original location for manual review
+- **All processed back scans** moved to `[source_directory]/processed/` including:
+  - Back scans with successfully applied metadata
+  - Blank/watermark-only back scans (successfully identified as having no content)
+- **Only true processing failures** remain in source for manual review (rare)
 - **Analysis files** remain in `/tmp/isolated_analysis/` for reference
 
 ## Expected Results
 
-Processing 398 analysis files typically yields:
-- 300+ original photos with successfully applied EXIF metadata
-- Back scans organized to processed/ subdirectory
-- Comprehensive statistics showing success rate
-- Detailed report of any failures or skipped files
+Processing analysis files typically yields:
+- High success rate for meaningful metadata application
+- **All back scans organized to processed/ subdirectory** (including blank scans)
+- Comprehensive statistics showing processing outcomes
+- Detailed categorization of results:
+  - **Successfully applied metadata:** Photos with meaningful content
+  - **Successfully processed (no content):** Blank/watermark-only back scans correctly identified
+  - **Processing failures:** Actual errors requiring manual review
 
 **Provide your source directory path to begin applying extracted metadata to all 398 analyzed photos.**
 
