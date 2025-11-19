@@ -65,6 +65,44 @@ The Task tool will:
 - **Error handling** - processes all 398 files even if some fail
 - **Comprehensive reporting** - detailed statistics and sample results
 
+## Metadata Quality Filtering
+
+**CRITICAL:** The apply system MUST filter out low-quality or problematic metadata:
+
+### **Skip/Exclude Fields Containing:**
+❌ **Useless Keywords:**
+- "degraded", "no readable text", "None extractable"
+- "no dates, names, or locations identified"
+- "[empty", "[leave empty", "no extractable metadata"
+
+❌ **Generic Descriptions:**
+- "None - no clear context visible"
+- "None - insufficient context"
+- "Photo lab back scan with degraded processing data"
+- "Photo back scan with machine-printed processing strip"
+
+❌ **Problematic Titles:**
+- "[uncertain: vertical text]"
+- "[uncertain: machine-printed processing data"
+- Any Caption-Abstract starting with "[uncertain:" and no clear content
+
+❌ **Watermark-Only ProcessingSoftware:**
+- Skip if only contains: "Kodak Royal Paper", "Fuji Color", "photo lab watermarks"
+- Apply only if contains actual APS/processing codes with data
+
+### **Quality Threshold Rules:**
+✅ **Apply Field IF:**
+- Contains meaningful personal content (names, locations, events)
+- Contains specific dates or times
+- Contains identifiable technical data (APS codes with IDs/timestamps)
+- Contains clear handwritten transcriptions
+
+❌ **Skip Field IF:**
+- Only contains generic lab/watermark information
+- Contains uncertainty markers without substantive content
+- Describes technical limitations ("too faded", "unclear", "degraded")
+- Uses placeholder language ("None", "empty", "no clear")
+
 ## File Organization
 
 After applying EXIF metadata:
