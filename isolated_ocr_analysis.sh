@@ -42,7 +42,8 @@ find "$PREPARED_DIR" -name "*_b.jpg" | sort | while read -r filepath; do
     fi
 
     # Create optimized extraction prompt with anti-hallucination rules
-    prompt_text="Use Read tool to analyze $filepath.
+    read -r -d '' prompt_text << EOF
+Use Read tool to analyze "$filepath".
 
 EXTRACT (VERBATIM ONLY):
 1. TRANSCRIPTION: Exact text as written - mark uncertain as [uncertain: word?]
@@ -87,7 +88,8 @@ ImageUniqueID: [APS roll+frame like ID529-981-05 or "None visible"]
 GPS:GPSLatitude: [decimal degrees if location identified or "None visible"]
 GPS:GPSLongitude: [decimal degrees if location identified or "None visible"]
 GPS:GPSLatitudeRef: [N/S hemisphere or "None visible"]
-GPS:GPSLongitudeRef: [E/W hemisphere or "None visible"]"
+GPS:GPSLongitudeRef: [E/W hemisphere or "None visible"]
+EOF
 
     # Run optimized Claude CLI analysis with error monitoring
     echo "  -> Launching optimized Claude CLI analysis..." | tee -a "$LOG_FILE"
@@ -118,12 +120,13 @@ GPS:GPSLongitudeRef: [E/W hemisphere or "None visible"]"
         echo "  -> ERROR: Analysis failed for $filename" | tee -a "$LOG_FILE"
         echo "ERROR: Failed to analyze $filename at $(date)" >> "$output_file"
         echo "Claude output: $claude_output" >> "$output_file"
-    elif echo "$claude_output" | grep -q "FILENAME:\|TRANSCRIPTION:\|EXIF_MAPPINGS:"; then
+    elif echo "$claude_output" | grep -q "FILENAME:\|TRANSCRIPTION:\|EXIF_MAPPINGS:\|\\*\\*FILENAME\|\\*\\*TRANSCRIPTION\|EXIF_MAPPINGS\|## OCR Analysis\|### VERBATIM TRANSCRIPTION\|Caption-Abstract:"; then
         echo "$claude_output" > "$output_file"
         echo "  -> Analysis completed: $output_file" | tee -a "$LOG_FILE"
     else
-        echo "  -> ERROR: Analysis failed for $filename" | tee -a "$LOG_FILE"
-        echo "ERROR: Failed to analyze $filename at $(date)" >> "$output_file"
+        echo "  -> ERROR: Unexpected output format for $filename" | tee -a "$LOG_FILE"
+        echo "ERROR: Unexpected output format for $filename at $(date)" >> "$output_file"
+        echo "Claude output length: $(echo "$claude_output" | wc -c)" >> "$output_file"
         echo "Claude output: $claude_output" >> "$output_file"
     fi
 

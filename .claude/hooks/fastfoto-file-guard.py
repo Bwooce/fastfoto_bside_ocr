@@ -51,7 +51,8 @@ def main():
                     r".*_proposal\.txt$",
                     r"exif_updates_proposal.*\.txt$",
                     r"fastfoto_proposal\.txt$",
-                    r"proposal\.txt$"
+                    r"proposal\.txt$",
+                    r".*_analysis\.txt$"
                 ]
                 if any(re.search(pattern, file_path) for pattern in allowed_txt_patterns):
                     sys.exit(0)  # Allow proposal files
