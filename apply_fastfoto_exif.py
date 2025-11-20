@@ -58,7 +58,12 @@ def extract_exif_mappings(analysis_content):
                 'blank', 'blank - no text visible', 'blank - no handwritten text present',
                 'blank - no context available', 'blank - no aps codes clearly readable',
                 'blank - no aps data', 'blank - no aps data visible',
-                'no text', 'not visible', 'not available', 'no handwritten content visible'
+                'no text', 'not visible', 'not available', 'no handwritten content visible',
+                'leave empty', 'leave empty - no context available',
+                'leave empty - no context available from back scan',
+                'empty - no event/location context from back scan',
+                'photo lab processing back scan', 'back scan with degraded processing data',
+                'no extractable metadata', 'not extractable', 'no context available'
             ]
 
             # Check if value contains pollution patterns
@@ -71,8 +76,10 @@ def extract_exif_mappings(analysis_content):
                     is_pollution = True
 
                 # Pattern match for longer pollution descriptions
-                elif (value_lower.startswith(('blank', 'none', 'no text', 'not visible', 'not available')) or
-                      'no handwritten' in value_lower or 'no aps' in value_lower):
+                elif (value_lower.startswith(('blank', 'none', 'no text', 'not visible', 'not available', 'leave empty', 'empty -')) or
+                      'no handwritten' in value_lower or 'no aps' in value_lower or
+                      'back scan' in value_lower or 'no context' in value_lower or
+                      'not extractable' in value_lower):
                     is_pollution = True
 
             # Only add non-polluted values

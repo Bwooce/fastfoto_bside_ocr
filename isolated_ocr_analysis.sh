@@ -74,20 +74,20 @@ LOCATIONS: [clearly written or None visible]
 PEOPLE: [names found or None visible]
 GPS_COORDINATES: [definitive lat,long or None generated]
 
-EXIF_MAPPINGS:
-Caption-Abstract: [verbatim handwritten text only]
-UserComment: [language] handwritten text: [verbatim transcription]
-ImageDescription: [brief event/location context if clear]
-IPTC:ObjectName: [handwritten text - Apple Photos title field]
-IPTC:Keywords: [dates;names;locations;events - semicolon separated]
-XMP:Description: [event/location context - broad compatibility]
-DateTimeOriginal: [YYYY:MM:DD HH:MM:SS EXIF format with time when available]
-ProcessingSoftware: [APS processing codes and equipment info]
-ImageUniqueID: [APS roll+frame like ID529-981-05 for true uniqueness - combine roll ID with frame number]
-GPS:GPSLatitude: [decimal degrees if location identified]
-GPS:GPSLongitude: [decimal degrees if location identified]
-GPS:GPSLatitudeRef: [N/S hemisphere]
-GPS:GPSLongitudeRef: [E/W hemisphere]"
+EXIF_MAPPINGS (use exact format - write "None visible" if no content):
+Caption-Abstract: [verbatim handwritten text or "None visible"]
+UserComment: [language] handwritten text: [verbatim transcription or "None visible"]
+ImageDescription: [brief event/location context or "None visible"]
+IPTC:ObjectName: [handwritten text for Apple Photos title or "None visible"]
+IPTC:Keywords: [dates,names,locations,events comma-separated or "None visible"]
+XMP:Description: [event/location context or "None visible"]
+DateTimeOriginal: [YYYY:MM:DD HH:MM:SS format or "None visible"]
+ProcessingSoftware: [APS processing codes and equipment info or "None visible"]
+ImageUniqueID: [APS roll+frame like ID529-981-05 or "None visible"]
+GPS:GPSLatitude: [decimal degrees if location identified or "None visible"]
+GPS:GPSLongitude: [decimal degrees if location identified or "None visible"]
+GPS:GPSLatitudeRef: [N/S hemisphere or "None visible"]
+GPS:GPSLongitudeRef: [E/W hemisphere or "None visible"]"
 
     # Run optimized Claude CLI analysis with error monitoring
     echo "  -> Launching optimized Claude CLI analysis..." | tee -a "$LOG_FILE"
