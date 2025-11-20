@@ -25,7 +25,7 @@ For each analyzed back scan, applies metadata to the corresponding original phot
 ### **Core EXIF Fields:**
 - **Caption-Abstract**: Verbatim handwritten text
 - **UserComment**: Language-tagged verbatim transcription
-- **ImageDescription**: Brief event/location context
+- **ImageDescription**: Verbatim handwritten text (for photo viewer compatibility)
 - **DateTimeOriginal**: ISO format (YYYY:MM:DD HH:MM:SS)
 - **Software**: APS codes and processing data
 - **ImageUniqueID**: Unique identifier from analysis

@@ -37,6 +37,10 @@ def extract_exif_mappings(analysis_content):
             continue
 
         if ':' in line and not line.startswith('#'):
+            # Strip bullet point prefix if present: "- **Field:**" -> "**Field:**"
+            if line.startswith('- **') and ':**' in line:
+                line = line[2:].strip()  # Remove "- " prefix
+
             # Handle markdown format: **Field:** value
             if line.startswith('**') and ':**' in line:
                 key, value = line.split(':**', 1)
@@ -75,7 +79,7 @@ def extract_exif_mappings(analysis_content):
             if value and not is_pollution:
                 mappings[key] = value
 
-    # Post-process mappings to ensure Caption-Abstract gets verbatim text from UserComment
+    # Post-process mappings to ensure Caption-Abstract and ImageDescription get verbatim text from UserComment
     if 'UserComment' in mappings and mappings['UserComment']:
         usercomment = mappings['UserComment']
 
@@ -98,6 +102,10 @@ def extract_exif_mappings(analysis_content):
             else:
                 # If no Caption-Abstract exists, set it to the verbatim text
                 mappings['Caption-Abstract'] = verbatim_text
+
+            # Always copy verbatim text to ImageDescription for photo viewer compatibility
+            # This ensures that photo viewers display the actual handwritten text instead of summaries
+            mappings['ImageDescription'] = verbatim_text
 
     return mappings
 
@@ -143,6 +151,10 @@ def apply_exif_metadata(photo_path, exif_mappings):
     applied_fields = []
     for field, value in exif_mappings.items():
         if field in field_mapping and value.strip():
+            # Fix keyword separator format: convert semicolons to commas for Apple Photos compatibility
+            if field == 'IPTC:Keywords' and ';' in value:
+                value = value.replace(';', ', ')
+
             cmd.extend([field_mapping[field] + '=' + value.strip()])
             applied_fields.append(field)
 
