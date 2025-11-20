@@ -120,7 +120,7 @@ EOF
         echo "  -> ERROR: Analysis failed for $filename" | tee -a "$LOG_FILE"
         echo "ERROR: Failed to analyze $filename at $(date)" >> "$output_file"
         echo "Claude output: $claude_output" >> "$output_file"
-    elif echo "$claude_output" | grep -q "FILENAME:\|TRANSCRIPTION:\|EXIF_MAPPINGS:\|\\*\\*FILENAME\|\\*\\*TRANSCRIPTION\|EXIF_MAPPINGS\|## OCR Analysis\|### VERBATIM TRANSCRIPTION\|Caption-Abstract:"; then
+    elif echo "$claude_output" | grep -q "## ANALYSIS RESULTS"; then
         echo "$claude_output" > "$output_file"
         echo "  -> Analysis completed: $output_file" | tee -a "$LOG_FILE"
     else
