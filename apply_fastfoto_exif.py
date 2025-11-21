@@ -10,6 +10,76 @@ import subprocess
 import glob
 import sys
 from pathlib import Path
+from typing import Dict, Tuple, Optional
+
+
+def fix_gps_coordinate_format(lat: str, lon: str, lat_ref: str, lon_ref: str) -> Tuple[str, str, str, str]:
+    """Fix GPS coordinate format issues"""
+    try:
+        lat_val = float(lat)
+        lon_val = float(lon)
+
+        # Ensure positive values (reference indicates direction)
+        lat_val = abs(lat_val)
+        lon_val = abs(lon_val)
+
+        # Fix latitude reference
+        if lat_ref not in ["N", "S"]:
+            lat_ref = "N" if lat_val >= 0 else "S"
+
+        # Fix longitude reference
+        if lon_ref not in ["E", "W"]:
+            lon_ref = "E" if lon_val >= 0 else "W"
+
+        return str(lat_val), str(lon_val), lat_ref, lon_ref
+
+    except (ValueError, TypeError):
+        return lat, lon, lat_ref, lon_ref
+
+def extract_aps_orientation_data(analysis_content: str) -> Optional[str]:
+    """Extract APS processing orientation data"""
+    # Look for APS processing codes that contain orientation information
+    aps_patterns = [
+        r'FFMXI[^<]*<[^>]*>[^W]*W\d+:\d+[^P]*P[^0-9]*\d+[^A-Z]*[A-Z]+',  # FFMXI format
+        r'NdSP:S\d+\s+\d+:\d+',  # NdSP format
+        r'K\d+W\d+',  # K3W18 format
+        r'MMMN\d+\.\d+\.\d+',  # MMMN format
+    ]
+
+    for pattern in aps_patterns:
+        matches = re.findall(pattern, analysis_content)
+        if matches:
+            return matches[0]
+
+    return None
+
+def enhance_mappings_with_coordinates(mappings: Dict[str, str], analysis_content: str) -> Dict[str, str]:
+    """Enhance EXIF mappings with orientation data and fix GPS coordinates that are already present"""
+    enhanced = mappings.copy()
+
+    # Only fix existing GPS coordinates - do NOT add new ones
+    gps_fields = ['GPS:GPSLatitude', 'GPS:GPSLongitude', 'GPS:GPSLatitudeRef', 'GPS:GPSLongitudeRef']
+    if all(field in enhanced for field in gps_fields):
+        lat, lon, lat_ref, lon_ref = fix_gps_coordinate_format(
+            enhanced['GPS:GPSLatitude'],
+            enhanced['GPS:GPSLongitude'],
+            enhanced['GPS:GPSLatitudeRef'],
+            enhanced['GPS:GPSLongitudeRef']
+        )
+        enhanced.update({
+            'GPS:GPSLatitude': lat,
+            'GPS:GPSLongitude': lon,
+            'GPS:GPSLatitudeRef': lat_ref,
+            'GPS:GPSLongitudeRef': lon_ref
+        })
+
+    # Add APS orientation data to ProcessingSoftware if not present
+    if 'ProcessingSoftware' not in enhanced or not enhanced['ProcessingSoftware']:
+        aps_data = extract_aps_orientation_data(analysis_content)
+        if aps_data:
+            enhanced['ProcessingSoftware'] = aps_data
+
+    return enhanced
 
 def extract_exif_mappings(analysis_content):
     """Extract EXIF mappings from analysis file content"""
@@ -148,14 +218,12 @@ def apply_exif_metadata(photo_path, exif_mappings):
         'ImageUniqueID': '-ImageUniqueID',
         'IPTC:ObjectName': '-IPTC:ObjectName',
         'IPTC:Keywords': '-IPTC:Keywords',
-        'XMP:Description': '-XMP:Description',
-        'GPS:GPSLatitude': '-GPS:GPSLatitude',
-        'GPS:GPSLongitude': '-GPS:GPSLongitude',
-        'GPS:GPSLatitudeRef': '-GPS:GPSLatitudeRef',
-        'GPS:GPSLongitudeRef': '-GPS:GPSLongitudeRef'
+        'XMP:Description': '-XMP:Description'
     }
 
     applied_fields = []
+    gps_coords = {}
+
     for field, value in exif_mappings.items():
         if field in field_mapping and value.strip():
             # Fix keyword separator format: convert semicolons to commas for Apple Photos compatibility
@@ -164,6 +232,40 @@ def apply_exif_metadata(photo_path, exif_mappings):
 
             cmd.extend([field_mapping[field] + '=' + value.strip()])
             applied_fields.append(field)
+
+        # Collect GPS coordinates separately
+        elif field.startswith('GPS:'):
+            gps_coords[field] = value.strip()
+
+    # Handle GPS coordinates with proper format conversion
+    if all(gps_field in gps_coords for gps_field in ['GPS:GPSLatitude', 'GPS:GPSLongitude', 'GPS:GPSLatitudeRef', 'GPS:GPSLongitudeRef']):
+        try:
+            lat = float(gps_coords['GPS:GPSLatitude'])
+            lon = float(gps_coords['GPS:GPSLongitude'])
+            lat_ref = gps_coords['GPS:GPSLatitudeRef'].upper()
+            lon_ref = gps_coords['GPS:GPSLongitudeRef'].upper()
+
+            # Convert to signed decimal degrees for exiftool compatibility
+            if lat_ref == 'S':
+                lat = -abs(lat)
+            else:
+                lat = abs(lat)
+
+            if lon_ref == 'W':
+                lon = -abs(lon)
+            else:
+                lon = abs(lon)
+
+            # Apply GPS coordinates using signed decimal format
+            cmd.extend([
+                f'-GPS:GPSLatitude={lat}',
+                f'-GPS:GPSLongitude={lon}'
+            ])
+            applied_fields.extend(['GPS:GPSLatitude', 'GPS:GPSLongitude'])
+
+        except (ValueError, TypeError) as e:
+            # Skip GPS if conversion fails
+            pass
 
     if not applied_fields:
         return False, "No valid EXIF fields to apply"
@@ -257,6 +359,9 @@ def main():
 
             # Extract EXIF mappings
             exif_mappings = extract_exif_mappings(content)
+
+            # Enhance mappings with GPS coordinates and orientation data
+            exif_mappings = enhance_mappings_with_coordinates(exif_mappings, content)
 
             # Find original photo
             original_photo = find_original_photo(back_scan_filename, source_dir)
