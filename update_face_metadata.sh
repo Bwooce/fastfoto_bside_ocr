@@ -230,8 +230,8 @@ for photo_file in sorted(photo_files):
         exiftool_cmd.extend([
             f'-GPS:GPSLatitude={lat}',
             f'-GPS:GPSLongitude={lon}',
-            f'-GPS:GPSLatitudeRef={"N" if lat >= 0 else "S"}',
-            f'-GPS:GPSLongitudeRef={"E" if lon >= 0 else "W"}'
+            f'-GPS:GPSLatitudeRef={\"N\" if lat >= 0 else \"S\"}',
+            f'-GPS:GPSLongitudeRef={\"E\" if lon >= 0 else \"W\"}'
         ])
 
     # Add orientation
