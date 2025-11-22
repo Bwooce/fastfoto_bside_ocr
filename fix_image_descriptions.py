@@ -75,7 +75,7 @@ def main():
     if len(sys.argv) != 2:
         print("Usage: python3 fix_image_descriptions.py [photo_directory]")
         print(
-            "Example: python3 fix_image_descriptions.py /Users/bruce/Pictures/MyPhotos"
+            "Example: python3 fix_image_descriptions.py ~/Pictures/MyPhotos"
         )
         return 1
 

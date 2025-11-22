@@ -174,7 +174,7 @@ After each transcription, ask yourself:
 - **NEVER guess or generalize coordinates** - GPS coordinates only for explicitly identified cities/landmarks
 - **NEVER assume geographic relationships** - don't assign country coordinates for unclear city names
 - **Mark uncertain locations**: Use [uncertain: location?] for unclear place names
-- **Verify place names**: Don't fabricate "Lock Haren, Netherlands" type geographic errors
+- **Verify place names**: Don't fabricate "Location, Country" type geographic errors
 - **No approximation**: Don't assign regional coordinates when specific location is unclear
 - **Explicit identification only**: Location must be clearly readable and identifiable to assign GPS data
 

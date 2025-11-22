@@ -2,7 +2,7 @@
 
 ## Overview
 
-Created a complete implementation for the `/fastfoto-apply` command that processes all 398 analysis files from `/tmp/isolated_analysis/` and applies EXIF metadata to original photos in `/Users/bruce/Pictures/2025_PeruScanning/`.
+Created a complete implementation for the `/fastfoto-apply` command that processes all 398 analysis files from `/tmp/isolated_analysis/` and applies EXIF metadata to original photos in `~/Pictures/2025_PeruScanning/`.
 
 ## Files Created/Modified
 
@@ -25,7 +25,7 @@ Created a complete implementation for the `/fastfoto-apply` command that process
 
 ### 3. Quick Start Guide
 **File**: `FASTFOTO_APPLY_QUICKSTART.md`
-- One-line usage: `/fastfoto-apply /Users/bruce/Pictures/2025_PeruScanning`
+- One-line usage: `/fastfoto-apply ~/Pictures/2025_PeruScanning`
 - Prerequisites checklist
 - Expected results and success metrics
 - File organization structure
@@ -126,7 +126,7 @@ Created a complete implementation for the `/fastfoto-apply` command that process
 ## Sample Analysis File
 
 ```
-**FILENAME:** 1978_Lock Haren_0003_b.jpg
+**FILENAME:** 1978_Location_0003_b.jpg
 **ORIENTATION:** correct
 **TRANSCRIPTION:** Panamne [uncertain: golef?] Siesta Marzo 1981
 **LANGUAGE:** Spanish
@@ -151,7 +151,7 @@ Created a complete implementation for the `/fastfoto-apply` command that process
 ### What Happens When User Runs Command
 
 ```bash
-/fastfoto-apply /Users/bruce/Pictures/2025_PeruScanning
+/fastfoto-apply ~/Pictures/2025_PeruScanning
 ```
 
 1. Claude Code reads `FASTFOTO_APPLY_IMPLEMENTATION.md`
@@ -208,29 +208,29 @@ The FastFoto workflow uses constraints that prevent script creation:
 ### Before Running `/fastfoto-apply`
 
 ```
-/Users/bruce/Pictures/2025_PeruScanning/
+~/Pictures/2025_PeruScanning/
 ├── 1966_Prom_0001.jpg
 ├── 1966_Prom_0001_b.jpg
 ├── 1966_Prom_0002.jpg
 ├── 1966_Prom_0002_b.jpg
-├── 1978_Lock Haren_0001.jpg
-├── 1978_Lock Haren_0001_b.jpg
+├── 1978_Location_0001.jpg
+├── 1978_Location_0001_b.jpg
 └── ... (1800+ files)
 ```
 
 ### After Running `/fastfoto-apply`
 
 ```
-/Users/bruce/Pictures/2025_PeruScanning/
+~/Pictures/2025_PeruScanning/
 ├── 1966_Prom_0001.jpg (EXIF updated)
 ├── 1966_Prom_0002.jpg (EXIF updated)
-├── 1978_Lock Haren_0001.jpg (EXIF updated)
+├── 1978_Location_0001.jpg (EXIF updated)
 ├── ... (original photos with updated EXIF)
-├── 1978_Lock Haren_0050_b.jpg (unprocessed back scan, if exists)
+├── 1978_Location_0050_b.jpg (unprocessed back scan, if exists)
 └── processed/
     ├── 1966_Prom_0001_b.jpg
     ├── 1966_Prom_0002_b.jpg
-    ├── 1978_Lock Haren_0001_b.jpg
+    ├── 1978_Location_0001_b.jpg
     └── ... (300+ processed back scans)
 ```
 
@@ -240,21 +240,21 @@ The FastFoto workflow uses constraints that prevent script creation:
 
 ```bash
 # View all metadata for one photo
-exiftool /Users/bruce/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | head -40
+exiftool ~/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | head -40
 
 # Check specific fields
-exiftool /Users/bruce/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | \
+exiftool ~/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | \
   grep -E "Caption|UserComment|Keywords|DateTimeOriginal|GPSLatitude"
 
 # Count processed back scans
-ls /Users/bruce/Pictures/2025_PeruScanning/processed/ | wc -l
+ls ~/Pictures/2025_PeruScanning/processed/ | wc -l
 ```
 
 ### Import to Apple Photos
 
 1. Open Apple Photos
 2. File → Import
-3. Select `/Users/bruce/Pictures/2025_PeruScanning/`
+3. Select `~/Pictures/2025_PeruScanning/`
 4. Photos now show:
    - Handwritten text as titles (IPTC:ObjectName)
    - Keywords in photo info
@@ -309,7 +309,7 @@ Add complete /fastfoto-apply implementation for 398 analysis files
 The `/fastfoto-apply` command is now fully implemented and ready for execution:
 
 ```bash
-/fastfoto-apply /Users/bruce/Pictures/2025_PeruScanning
+/fastfoto-apply ~/Pictures/2025_PeruScanning
 ```
 
 This will process all 398 analysis files and apply EXIF metadata to 300+ original photos with comprehensive error handling and detailed reporting.

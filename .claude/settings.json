@@ -17,7 +17,7 @@
       "Read(/tmp/*_proposal.txt)",
       "Read(/tmp/fastfoto_proposal.txt)",
       "Read(/tmp/exif_updates_proposal*.txt)",
-      "Read(/Users/bruce/Pictures/2025_PeruScanning/**)",
+      "Read(~/Pictures/2025_PeruScanning/**)",
       "Read(/private/tmp/fastfoto_prepared/**)",
       "Read(/tmp/**)",
       "Write(/tmp/fastfoto_*.json)",
@@ -90,8 +90,8 @@
       "Bash(./isolated_ocr_analysis.sh:*)",
       "SlashCommand(/fastfoto-apply:*)",
       "SlashCommand(/fastfoto-analyze:*)",
-      "Read(/Users/bruce/Pictures/2025_PeruScanning/**)",
-      "Read(/Users/bruce/Pictures/**)"
+      "Read(~/Pictures/2025_PeruScanning/**)",
+      "Read(~/Pictures/**)"
     ],
     "deny": [],
     "ask": []

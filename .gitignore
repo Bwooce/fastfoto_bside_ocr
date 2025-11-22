@@ -65,3 +65,5 @@ venv/
 .DS_Store
 Clean_Apple_Photos_Metadata.applescript
 Simple_Clean_Selected_Photos.applescript
+__pycache__/
+*_proposal.txt

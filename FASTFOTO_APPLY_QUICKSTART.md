@@ -3,7 +3,7 @@
 ## One-Line Usage
 
 ```bash
-/fastfoto-apply /Users/bruce/Pictures/2025_PeruScanning
+/fastfoto-apply ~/Pictures/2025_PeruScanning
 ```
 
 That's it! This single command will:
@@ -28,7 +28,7 @@ The `/fastfoto-apply` command uses the Task tool to:
 
 Before running `/fastfoto-apply`:
 
-1. Run `/fastfoto-analyze /Users/bruce/Pictures/2025_PeruScanning` first
+1. Run `/fastfoto-analyze ~/Pictures/2025_PeruScanning` first
 2. Wait for 398 analysis files to be generated in `/tmp/isolated_analysis/`
 3. Make sure exiftool is installed: `brew install exiftool`
 
@@ -68,15 +68,15 @@ For each original photo, the command applies:
 After running the command:
 
 ```
-/Users/bruce/Pictures/2025_PeruScanning/
+~/Pictures/2025_PeruScanning/
 ├── 1966_Prom_0001.jpg (EXIF updated)
 ├── 1966_Prom_0002.jpg (EXIF updated)
-├── 1978_Lock Haren_0001.jpg (EXIF updated)
+├── 1978_Location_0001.jpg (EXIF updated)
 ├── ...
 └── processed/
     ├── 1966_Prom_0001_b.jpg
     ├── 1966_Prom_0002_b.jpg
-    ├── 1978_Lock Haren_0001_b.jpg
+    ├── 1978_Location_0001_b.jpg
     └── ... (all processed back scans)
 ```
 
@@ -105,13 +105,13 @@ To verify metadata was applied correctly:
 
 ```bash
 # View metadata for one photo
-exiftool /Users/bruce/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | head -30
+exiftool ~/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | head -30
 
 # Check for specific fields
-exiftool /Users/bruce/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | grep -E "Caption|UserComment|Keywords|DateTimeOriginal|GPSLatitude"
+exiftool ~/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | grep -E "Caption|UserComment|Keywords|DateTimeOriginal|GPSLatitude"
 
 # Count back scans moved to processed/
-ls /Users/bruce/Pictures/2025_PeruScanning/processed/ | wc -l
+ls ~/Pictures/2025_PeruScanning/processed/ | wc -l
 ```
 
 ## If Something Goes Wrong
@@ -127,7 +127,7 @@ Check the final report for details on any failures.
 
 ## For More Details
 
-See `/Users/bruce/dev/fastfoto_bside_ocr/FASTFOTO_APPLY_IMPLEMENTATION.md` for:
+See `./FASTFOTO_APPLY_IMPLEMENTATION.md` for:
 
 - Complete implementation details
 - EXIF field mappings

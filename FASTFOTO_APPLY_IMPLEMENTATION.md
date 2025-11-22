@@ -5,7 +5,7 @@ Complete implementation details for `/fastfoto-apply [source_directory]` command
 ## Command Invocation
 
 ```bash
-/fastfoto-apply /Users/bruce/Pictures/2025_PeruScanning
+/fastfoto-apply ~/Pictures/2025_PeruScanning
 ```
 
 ## Execution Flow
@@ -138,7 +138,7 @@ Detailed Statistics:
 
 Sample Successful Applications (showing first 5):
   ✓ 1966_Prom_0001.jpg (12 fields)
-  ✓ 1978_Lock Haren_0001.jpg (8 fields)
+  ✓ 1978_Location_0001.jpg (8 fields)
   ... more samples ...
 
 Sample Failures (showing first 5):
@@ -157,7 +157,7 @@ Report generated: 2025-11-14 23:00:00
 ## Sample Analysis File Format
 
 ```
-**FILENAME:** 1978_Lock Haren_0003_b.jpg
+**FILENAME:** 1978_Location_0003_b.jpg
 
 **ORIENTATION:** correct
 
@@ -256,18 +256,18 @@ After completion, verify with sample photos:
 
 ```bash
 # Check one photo's metadata
-exiftool /Users/bruce/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | grep -E "Caption|UserComment|Keywords|DateTimeOriginal|GPSLatitude"
+exiftool ~/Pictures/2025_PeruScanning/1966_Prom_0001.jpg | grep -E "Caption|UserComment|Keywords|DateTimeOriginal|GPSLatitude"
 
 # Check processed directory
-ls /Users/bruce/Pictures/2025_PeruScanning/processed/ | head -20
+ls ~/Pictures/2025_PeruScanning/processed/ | head -20
 
 # Count successful applications
-ls /Users/bruce/Pictures/2025_PeruScanning/processed/ | wc -l
+ls ~/Pictures/2025_PeruScanning/processed/ | wc -l
 ```
 
 ## Task Tool Usage
 
-When user runs `/fastfoto-apply /Users/bruce/Pictures/2025_PeruScanning`, Claude Code will execute with Task tool:
+When user runs `/fastfoto-apply ~/Pictures/2025_PeruScanning`, Claude Code will execute with Task tool:
 
 ```
 Use Task tool with:

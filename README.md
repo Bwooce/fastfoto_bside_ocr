@@ -232,7 +232,7 @@ INSTRUCTIONS:
     GPSLongitude: 5, 7, 15.0
     GPSLongitudeRef: E
     LocationCreatedCity: Utrecht
-    LocationCreatedCountryName: Netherlands
+    LocationCreatedCountryName: Country
     Caption-Abstract: Summer vacation trip
     Keywords: vacation, 1999, Utrecht
 
