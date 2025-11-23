@@ -2,7 +2,7 @@
 
 # Apple Photos Metadata Extractor
 # Updates existing photos with comprehensive Apple Photos metadata
-# Includes: face recognition, GPS coordinates, and orientation data
+# Includes: face recognition, GPS coordinates, orientation data, titles, and descriptions
 # Smart behavior: Only processes files when Apple Photos data is newer than file metadata
 # Usage: ./update_face_metadata.sh [OPTIONS] directory1 [directory2] [directory3] ...
 
@@ -26,6 +26,8 @@ while [[ $# -gt 0 ]]; do
             echo "• Face recognition data (XMP:PersonInImage, XMP:Subject)"
             echo "• GPS coordinates (GPS:GPSLatitude, GPS:GPSLongitude, GPS:GPSAltitude)"
             echo "• SQLite display orientation from Apple Photos database (EXIF:Orientation)"
+            echo "• Title and description text (IPTC:Headline, EXIF:ImageDescription, XMP fields)"
+            echo "• Keywords and tags (IPTC:Keywords, XMP:Subject) with comma separators"
             echo
             echo "Examples:"
             echo "  $0 ~/Photos/Vacation                    # Process single directory"
@@ -74,7 +76,7 @@ DIRS=("$@")
 # Activate osxphotos virtual environment
 source ~/osxphotos_env/osxphotos/bin/activate
 
-echo "🔍 Updating comprehensive metadata (faces, GPS, orientation) for photos in directories:"
+echo "🔍 Updating comprehensive metadata (faces, GPS, orientation, titles, descriptions, keywords) for photos in directories:"
 for dir in "${DIRS[@]}"; do
     echo "   $dir"
 done
@@ -96,7 +98,7 @@ update_directory_faces() {
     temp_export="/tmp/face_metadata_export_$(date +%s)"
     mkdir -p "$temp_export"
 
-    echo "🚀 Processing metadata (faces, GPS, orientation) from Apple Photos database..."
+    echo "🚀 Processing metadata (faces, GPS, orientation, titles, descriptions, keywords) from Apple Photos database..."
 
     # Initialize counters
     total_files=0
@@ -215,6 +217,14 @@ for photo_file in sorted(photo_files):
 
     orientation = photo_data.get('orientation', 1)
 
+    # Extract title and description
+    title = (photo_data.get('title') or '').strip()
+    description = (photo_data.get('description') or '').strip()
+
+    # Extract keywords (ensure comma-separated format)
+    keywords = photo_data.get('keywords', []) or []
+    keywords_str = ', '.join(keywords) if keywords else ''
+
     # Build exiftool command
     exiftool_cmd = ['exiftool', '-overwrite_original']
 
@@ -234,16 +244,47 @@ for photo_file in sorted(photo_files):
             f'-GPS:GPSLongitudeRef={\"E\" if lon >= 0 else \"W\"}'
         ])
 
-    # Add orientation
-    if orientation != 1:
+    # Add orientation (map 0 to 1 for Apple Photos compatibility)
+    normalized_orientation = 1 if orientation == 0 else orientation
+
+    # Only apply valid EXIF orientation values (1-8)
+    if normalized_orientation in range(1, 9):
         orientation_map = {
             1: 'Horizontal (normal)', 2: 'Mirror horizontal', 3: 'Rotate 180',
             4: 'Mirror vertical', 5: 'Mirror horizontal and rotate 270 CW',
             6: 'Rotate 90 CW', 7: 'Mirror horizontal and rotate 90 CW', 8: 'Rotate 270 CW'
         }
-        orientation_desc = orientation_map.get(orientation, str(orientation))
-        print(f'    🔄 Setting orientation: {orientation} ({orientation_desc})')
+        orientation_desc = orientation_map[normalized_orientation]
+        if orientation == 0:
+            print(f'    🔄 Setting orientation: {orientation} → 1 (normalizing "unknown" to "normal")')
+        else:
+            print(f'    🔄 Setting orientation: {orientation} ({orientation_desc})')
         exiftool_cmd.append(f'-EXIF:Orientation={orientation_desc}')
+
+    # Add title metadata
+    if title:
+        print('    📝 Setting title: ' + title[:50] + ('...' if len(title) > 50 else ''))
+        exiftool_cmd.extend([
+            f'-IPTC:Headline={title}',
+            f'-XMP:Title={title}'
+        ])
+
+    # Add description metadata
+    if description:
+        print('    📄 Setting description: ' + description[:50] + ('...' if len(description) > 50 else ''))
+        exiftool_cmd.extend([
+            f'-EXIF:ImageDescription={description}',
+            f'-IPTC:Caption-Abstract={description}',
+            f'-XMP:Description={description}'
+        ])
+
+    # Add keywords metadata (comma-separated for compatibility)
+    if keywords_str:
+        print('    🏷️  Setting keywords: ' + keywords_str[:60] + ('...' if len(keywords_str) > 60 else ''))
+        exiftool_cmd.extend([
+            f'-IPTC:Keywords={keywords_str}',
+            f'-XMP:Subject={keywords_str}'
+        ])
 
     # Execute exiftool
     exiftool_cmd.append(photo_file)
@@ -286,7 +327,9 @@ echo "📝 Metadata extracted from Apple Photos SQLite database and applied to E
 echo "   • Face recognition: Person names and face region coordinates (XMP:PersonInImage)"
 echo "   • GPS coordinates: Latitude, longitude, altitude, and references (GPS:GPSLatitude, etc.)"
 echo "   • Display orientation: SQLite orientation values applied to images (EXIF:Orientation)"
+echo "   • Title and description: Photo titles and descriptions (IPTC:Headline, EXIF:ImageDescription)"
+echo "   • Keywords and tags: Comma-separated keywords (IPTC:Keywords, XMP:Subject)"
 echo "   • Compatible with Adobe Lightroom, Digikam, and other photo software"
 echo
 echo "🔍 You can verify the metadata using:"
-echo "   exiftool -XMP:PersonInImage -GPS:all -EXIF:Orientation /path/to/photo.jpg"
+echo "   exiftool -XMP:PersonInImage -GPS:all -EXIF:Orientation -IPTC:Headline -EXIF:ImageDescription -IPTC:Keywords /path/to/photo.jpg"
